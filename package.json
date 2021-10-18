@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "monorepo",
+  "version": "0.0.1",
+  "scripts": {
+    "bootstrap": "lerna bootstrap"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
