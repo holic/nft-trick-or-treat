@@ -23,7 +23,8 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
   functions: {
     "bagContents((address,uint256))": FunctionFragment;
     "dailyVisits(uint256)": FunctionFragment;
-    "initialize()": FunctionFragment;
+    "initialize(address)": FunctionFragment;
+    "isTrustedForwarder(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "placeVisits(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -40,9 +41,10 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
     functionFragment: "dailyVisits",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "initialize", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values?: undefined
+    functionFragment: "isTrustedForwarder",
+    values: [string]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -78,6 +80,10 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isTrustedForwarder",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "placeVisits",
@@ -183,8 +189,14 @@ export class TrickOrTreat extends BaseContract {
     ): Promise<[number]>;
 
     initialize(
+      trustedForwarder: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    isTrustedForwarder(
+      forwarder: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -219,8 +231,14 @@ export class TrickOrTreat extends BaseContract {
   dailyVisits(arg0: BigNumberish, overrides?: CallOverrides): Promise<number>;
 
   initialize(
+    trustedForwarder: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  isTrustedForwarder(
+    forwarder: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -254,7 +272,15 @@ export class TrickOrTreat extends BaseContract {
 
     dailyVisits(arg0: BigNumberish, overrides?: CallOverrides): Promise<number>;
 
-    initialize(overrides?: CallOverrides): Promise<void>;
+    initialize(
+      trustedForwarder: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    isTrustedForwarder(
+      forwarder: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -361,7 +387,13 @@ export class TrickOrTreat extends BaseContract {
     ): Promise<BigNumber>;
 
     initialize(
+      trustedForwarder: string,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    isTrustedForwarder(
+      forwarder: string,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -401,7 +433,13 @@ export class TrickOrTreat extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     initialize(
+      trustedForwarder: string,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    isTrustedForwarder(
+      forwarder: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;

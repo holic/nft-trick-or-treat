@@ -17,9 +17,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OwnableUpgradeable__factory>;
     getContractFactory(
+      name: "ERC2771ContextUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC2771ContextUpgradeable__factory>;
+    getContractFactory(
+      name: "MinimalForwarderUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MinimalForwarderUpgradeable__factory>;
+    getContractFactory(
       name: "TrickOrTreat",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TrickOrTreat__factory>;
+    getContractFactory(
+      name: "TrustedForwarder",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TrustedForwarder__factory>;
 
     getContractAt(
       name: "OwnableUpgradeable",
@@ -27,10 +39,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OwnableUpgradeable>;
     getContractAt(
+      name: "ERC2771ContextUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC2771ContextUpgradeable>;
+    getContractAt(
+      name: "MinimalForwarderUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MinimalForwarderUpgradeable>;
+    getContractAt(
       name: "TrickOrTreat",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TrickOrTreat>;
+    getContractAt(
+      name: "TrustedForwarder",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TrustedForwarder>;
 
     // default types
     getContractFactory(

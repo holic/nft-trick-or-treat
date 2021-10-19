@@ -2,11 +2,13 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol';
+
 import "./util/Random.sol";
 
 import "hardhat/console.sol";
 
-contract TrickOrTreat is OwnableUpgradeable {
+contract TrickOrTreat is OwnableUpgradeable, ERC2771ContextUpgradeable {
     // I started with ERC-1155, but realized I wanted to store balances in relation to
     // an NFT rather than a wallet. Because an NFT is a contract address + token ID, we
     // need to do our own thing. Not great, but this approach let's us move.
@@ -30,8 +32,9 @@ contract TrickOrTreat is OwnableUpgradeable {
     event Tricked(address indexed visitorContractAddress, uint256 indexed visitorTokenId, uint16 amount);
     event Treated(address indexed visitorContractAddress, uint256 indexed visitorTokenId, uint16 amount);
 
-    function initialize() public initializer {
+    function initialize(address trustedForwarder) public initializer {
         __Ownable_init();
+        __ERC2771Context_init(trustedForwarder);
     }
 
     function getVisitorHash(NFT memory visitor) internal pure returns (uint256) {
@@ -77,5 +80,13 @@ contract TrickOrTreat is OwnableUpgradeable {
             treats[visitorHash] = treats[visitorHash] + amount;
             emit Treated(visitor.contractAddress, visitor.tokenId, amount);
         }
+    }
+
+    function _msgSender() internal view virtual override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (address sender) {
+        return ERC2771ContextUpgradeable._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (bytes calldata) {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }

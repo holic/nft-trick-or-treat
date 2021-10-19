@@ -1,6 +1,17 @@
 import fs from "fs/promises";
-import { TrickOrTreat, TrickOrTreat__factory } from "../typechain";
+import {
+  TrickOrTreat,
+  TrickOrTreat__factory,
+  TrustedForwarder,
+  TrustedForwarder__factory,
+} from "../typechain";
 import { ethers, upgrades, network } from "hardhat";
+
+// https://docs.biconomy.io/misc/contract-addresses
+const trustedForwarders: Record<string, string> = {
+  matic: "0x86C80a8aa58e0A4fa09A69624c31Ab2a6CAD56b8",
+  mumbai: "0x9399BB24DBB5C4b782C70c2969F58716Ebbd6a3b",
+};
 
 const exists = (path: string) =>
   fs
@@ -20,13 +31,27 @@ async function start() {
     );
   }
 
+  // Deploy trusted forwarder for local dev
+  let trustedForwarder = trustedForwarders[network.name];
+  if (network.name === "localhost") {
+    console.log("Deploying TrustedForwarder...");
+    const TrustedForwarderFactory = (await ethers.getContractFactory(
+      "TrustedForwarder"
+    )) as TrustedForwarder__factory;
+    const trustedForwarderContract = (await upgrades.deployProxy(
+      TrustedForwarderFactory,
+      []
+    )) as TrustedForwarder;
+    trustedForwarder = trustedForwarderContract.address;
+  }
+
   console.log("Deploying TrickOrTreat...");
   const ContractFactory = (await ethers.getContractFactory(
     "TrickOrTreat"
   )) as TrickOrTreat__factory;
-  const contract = (await upgrades.deployProxy(
-    ContractFactory
-  )) as TrickOrTreat;
+  const contract = (await upgrades.deployProxy(ContractFactory, [
+    trustedForwarder,
+  ])) as TrickOrTreat;
 
   console.log("Deploy TX: ", contract.deployTransaction.hash);
   await contract.deployed();

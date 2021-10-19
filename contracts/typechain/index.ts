@@ -2,7 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { OwnableUpgradeable } from "./OwnableUpgradeable";
+export type { ERC2771ContextUpgradeable } from "./ERC2771ContextUpgradeable";
+export type { MinimalForwarderUpgradeable } from "./MinimalForwarderUpgradeable";
 export type { TrickOrTreat } from "./TrickOrTreat";
+export type { TrustedForwarder } from "./TrustedForwarder";
 
 export { OwnableUpgradeable__factory } from "./factories/OwnableUpgradeable__factory";
+export { ERC2771ContextUpgradeable__factory } from "./factories/ERC2771ContextUpgradeable__factory";
+export { MinimalForwarderUpgradeable__factory } from "./factories/MinimalForwarderUpgradeable__factory";
 export { TrickOrTreat__factory } from "./factories/TrickOrTreat__factory";
+export { TrustedForwarder__factory } from "./factories/TrustedForwarder__factory";
