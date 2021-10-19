@@ -3,6 +3,7 @@ import * as signedMessageData from "@app/utils/signedMessageData";
 import { ethers } from "ethers";
 import { isOwner } from "@app/utils/nftContracts";
 import { trickOrTreatContract } from "@app/utils/contracts";
+import { NonceManager } from "@ethersproject/experimental";
 
 if (!process.env.DEPLOYER_PRIVATE_KEY) {
   throw new Error("Missing environment variable: DEPLOYER_PRIVATE_KEY");
@@ -13,7 +14,8 @@ const wallet = new ethers.Wallet(
   trickOrTreatContract.provider
 );
 
-const ownerContract = trickOrTreatContract.connect(wallet);
+const nonceManager = new NonceManager(wallet);
+const ownerContract = trickOrTreatContract.connect(nonceManager);
 
 const errorMessages = {
   BAG_FULL:
@@ -65,7 +67,6 @@ export default async function handler(
     }
 
     for (const [errorCode, message] of Object.entries(errorMessages)) {
-      console.log("checking for error code", errorCode);
       if (error.message.includes(`PUMPKIN__${errorCode}`)) {
         return res.status(400).json({
           error: errorCode,
