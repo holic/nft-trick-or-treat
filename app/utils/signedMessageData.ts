@@ -1,9 +1,5 @@
 import { ethers } from "ethers";
-
-export type NFT = {
-  contractAddress: string;
-  tokenId: string;
-};
+import { NFT } from "./types";
 
 export type RingDoorbellMessage = {
   visitor: NFT;

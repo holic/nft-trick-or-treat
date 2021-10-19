@@ -5,6 +5,8 @@ import { TopBar } from "@app/components/TopBar";
 import { Wallet } from "@app/components/Wallet";
 import { WalletConnectButton } from "@app/components/WalletConnectButton";
 import { Container } from "@app/components/Container";
+import { ToastProvider } from "@app/utils/useToast";
+import { Toasts } from "@app/components/Toasts";
 
 type Props = {
   children: React.ReactNode;
@@ -47,22 +49,25 @@ export const Layout = ({ children }: Props) => (
         rel="stylesheet"
       ></link>
     </Head>
-    <WalletProvider
-      cacheProvider
-      network="mainnet"
-      fallback={
-        <>
-          <TopBar>
-            <WalletConnectButton />
-          </TopBar>
-          <ConnectWallet />
-        </>
-      }
-    >
-      <TopBar>
-        <Wallet />
-      </TopBar>
-      {children}
-    </WalletProvider>
+    <ToastProvider>
+      <WalletProvider
+        cacheProvider
+        network="mainnet"
+        fallback={
+          <>
+            <TopBar>
+              <WalletConnectButton />
+            </TopBar>
+            <ConnectWallet />
+          </>
+        }
+      >
+        <TopBar>
+          <Wallet />
+        </TopBar>
+        {children}
+        <Toasts />
+      </WalletProvider>
+    </ToastProvider>
   </>
 );

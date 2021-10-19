@@ -1,5 +1,5 @@
 import { useENSForAddress } from "ethereal-react";
-import { PendingIcon } from "@app/components/PendingIcon";
+import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { Suspense } from "@app/components/Suspense";
 
 const shortAddress = (address: string) =>
@@ -10,12 +10,8 @@ const WalletConnected = () => {
   return <div>👻 {ens ? shortAddress(ens) : null}</div>;
 };
 
-export const Wallet = () => {
-  return (
-    <div className="text-gray-400">
-      <Suspense fallback={<PendingIcon />}>
-        <WalletConnected />
-      </Suspense>
-    </div>
-  );
-};
+export const Wallet = () => (
+  <Suspense fallback={<PendingIcon />}>
+    <WalletConnected />
+  </Suspense>
+);

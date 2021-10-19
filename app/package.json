@@ -9,8 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "contracts": "^0.0.1",
+    "@headlessui/react": "^1.4.1",
     "classnames": "^2.3.1",
+    "contracts": "^0.0.1",
     "ethereal-react": "^0.3.2",
     "ethers": "^5.4.6",
     "lodash": "^4.17.21",

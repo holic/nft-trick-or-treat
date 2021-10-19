@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { useAsync } from "react-use";
 import Link from "next/link";
 import { Layout } from "@app/components/Layout";
-import { PendingIcon } from "@app/components/PendingIcon";
+import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { Suspense } from "@app/components/Suspense";
 import { useUserAddress } from "ethereal-react";
 import { Container } from "@app/components/Container";
@@ -23,6 +23,11 @@ const NFTs = () => {
 
   return (
     <div className="flex flex-wrap gap-4 justify-center">
+      {nfts.loading ? (
+        <span className="text-4xl">
+          <PendingIcon />
+        </span>
+      ) : null}
       {nfts.value?.map((nft) => (
         <Link
           key={`${nft.tokenAddress}:${nft.tokenId}`}
@@ -49,7 +54,7 @@ const HomePage: NextPage = () => (
   <Layout>
     <Container>
       <div className="text-center pt-16 pb-64 space-y-8">
-        <p className="text-2xl">
+        <p className="text-2xl text-yellow-400">
           Happy Halloween! Who are you bringing to trick-or-treat with you?
         </p>
         <Suspense fallback={<PendingIcon />}>
