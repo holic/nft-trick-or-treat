@@ -74,3 +74,5 @@ addContract("0x3769c5700da07fe5b8eee86be97e061f961ae340", ERC_721_ABI);
 addContract("0x30cdac3871c41a63767247c8d1a2de59f5714e78", ERC_721_ABI);
 // Nifty League DEGENs
 addContract("0x986aea67c7d6a15036e18678065eb663fc5be883", ERC_721_ABI);
+// Spicy Pumpkins
+addContract("0x07a13eea351d501cfedf96bda8528bbc71ca5d80", ERC_721_ABI);

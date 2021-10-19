@@ -30,6 +30,8 @@ const NFTs = () => {
           "0x30cdac3871c41a63767247c8d1a2de59f5714e78",
           // Nifty League DEGENs
           "0x986aea67c7d6a15036e18678065eb663fc5be883",
+          // Spicy Pumpkins
+          "0x07a13eea351d501cfedf96bda8528bbc71ca5d80",
         ],
         limit: 50,
       }),
