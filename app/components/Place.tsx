@@ -49,8 +49,6 @@ export const Place = ({ visitor, place, name, imageUrl }: Props) => {
   const [{ loading, error, value }, ringDoorbell] = useRingDoorbell();
   const isDisabled = loading || value;
 
-  console.log("got error", error, value);
-
   return (
     <div className="w-40">
       <button
