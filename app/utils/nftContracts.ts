@@ -53,9 +53,6 @@ const addContract = (
   }
 };
 
-// OpenSea NFT
-addContract("0x495f947276749ce646f68ac8c248420045cb7b5e", ERC_1155_ABI);
-
 export const isOwner = async (
   contractAddress: string,
   ownerAddress: string,
@@ -67,3 +64,12 @@ export const isOwner = async (
   }
   return await contract.isOwner(ownerAddress, tokenId);
 };
+
+// OpenSea NFTs
+addContract("0x495f947276749ce646f68ac8c248420045cb7b5e", ERC_1155_ABI);
+// Gawds
+addContract("0x3769c5700da07fe5b8eee86be97e061f961ae340", ERC_721_ABI);
+// Obits
+addContract("0x30cdac3871c41a63767247c8d1a2de59f5714e78", ERC_721_ABI);
+// Nifty League DEGENs
+addContract("0x986aea67c7d6a15036e18678065eb663fc5be883", ERC_721_ABI);
