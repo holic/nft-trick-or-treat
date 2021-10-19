@@ -57,7 +57,7 @@ const Places = () => {
       [string, ethers.BigNumber, number],
       {}
     > = (address, tokenId, amount) => {
-      addToast(`Yay, they gave us ${amount} treats. Thanks!`);
+      addToast(`🍬 Yay, they gave us ${amount} treats. Thanks!`);
     };
 
     const trickedFilter = trickOrTreatContract.filters.Tricked(
@@ -70,7 +70,7 @@ const Places = () => {
       {}
     > = (address, tokenId, amount) => {
       addToast(
-        `Oh no! They tricked us! They took ${amount} of my treats. Let's get out of here!`
+        `👺 Oh no, they tricked us! They took ${amount} of my treats. Let's get out of here!`
       );
     };
 

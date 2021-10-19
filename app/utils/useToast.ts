@@ -1,6 +1,7 @@
 import { createStateContext } from "react-use";
 
 export type Toast = {
+  id: string;
   message: string;
 };
 
@@ -12,15 +13,18 @@ export const useToast = () => {
   const [toasts, setToastState] = useToastState();
 
   const removeToast = (toast: Toast) => {
-    setToastState(toasts.filter((t) => t !== toast));
+    setToastState((toasts) => toasts.filter((t) => t !== toast));
   };
 
   const addToast = (message: string) => {
-    const toast = { message };
+    const toast = {
+      id: `${Date.now()}:${Math.random()}`,
+      message,
+    };
     setToastState((toasts) => [...toasts, toast]);
     setTimeout(() => {
       removeToast(toast);
-    }, 1000 * 10);
+    }, 1000 * 30);
   };
 
   return { toasts, addToast, removeToast };

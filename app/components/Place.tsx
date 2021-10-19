@@ -47,7 +47,7 @@ const useRingDoorbell = () => {
     }).then((res) => res.json());
 
     if (result.error) {
-      addToast(result.message);
+      addToast(`🎃 ${result.message}`);
     }
 
     // For successes, we'll let the event listener generate a toast

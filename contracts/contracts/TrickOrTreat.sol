@@ -68,8 +68,9 @@ contract TrickOrTreat is OwnableUpgradeable {
         uint16 amount = uint16(Random.random() % 5 + 1);
 
         // ~10% chance of getting tricked
-        if (Random.random() % 10 == 0) {
-            treats[visitorHash] = treats[visitorHash] > amount ? treats[visitorHash] - amount : 0;
+        if (Random.random() % 10 == 0 && treats[visitorHash] > 0) {
+            amount = amount > treats[visitorHash] ? treats[visitorHash] : amount;
+            treats[visitorHash] = amount;
             emit Tricked(visitor.contractAddress, visitor.tokenId, amount);
         }
         else {
