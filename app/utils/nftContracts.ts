@@ -43,7 +43,7 @@ const addContract = (
   } else if (abi === ERC_721_ABI) {
     contracts[contractAddress] = {
       contract,
-      isOwner: async (tokenId, ownerAddress) => {
+      isOwner: async (ownerAddress, tokenId) => {
         const address = await contract.ownerOf(tokenId);
         return address === ownerAddress;
       },
@@ -58,6 +58,7 @@ export const isOwner = async (
   ownerAddress: string,
   tokenId: string
 ) => {
+  console.log("querying for owner", { contractAddress, ownerAddress, tokenId });
   const contract = contracts[contractAddress];
   if (!contract) {
     throw new Error(`Unsupported contract (${contractAddress})`);
