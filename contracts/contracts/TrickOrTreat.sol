@@ -52,7 +52,7 @@ contract TrickOrTreat is OwnableUpgradeable {
         require(treats[visitorHash] < 500, "PUMPKIN__BAG_FULL");
 
         uint256 visitorTodayHash = uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, block.timestamp / 1 days)));
-        require(dailyVisits[visitorTodayHash] < 20, "PUMPKIN__TOO_TIRED");
+        require(dailyVisits[visitorTodayHash] < 12, "PUMPKIN__TOO_TIRED");
 
         // Check if visitor has already been to place today
         uint256 placeVisitHash = uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, place.contractAddress, place.tokenId)));
@@ -61,20 +61,20 @@ contract TrickOrTreat is OwnableUpgradeable {
         dailyVisits[visitorTodayHash] += 1;
         placeVisits[placeVisitHash] = block.timestamp;
 
-        // Check if anyone is home today, ~10% chance no one is home
+        // Check if anyone is home today
         uint256 isAnyoneHomeToday = uint256(keccak256(abi.encode(place.contractAddress, place.tokenId, block.timestamp / 1 days)));
-        require(isAnyoneHomeToday % 10 != 0, "PUMPKIN__NO_ANSWER");
+        require(isAnyoneHomeToday % 8 != 0, "PUMPKIN__NO_ANSWER");
+
 
         uint16 amount = uint16(Random.random() % 5 + 1);
 
-        // ~10% chance of getting tricked
-        if (Random.random() % 10 == 0 && treats[visitorHash] > 0) {
+        if (Random.random() % 6 == 0 && treats[visitorHash] > 0) {
             amount = amount > treats[visitorHash] ? treats[visitorHash] : amount;
-            treats[visitorHash] = amount;
+            treats[visitorHash] = treats[visitorHash] - amount;
             emit Tricked(visitor.contractAddress, visitor.tokenId, amount);
         }
         else {
-            treats[visitorHash] += amount;
+            treats[visitorHash] = treats[visitorHash] + amount;
             emit Treated(visitor.contractAddress, visitor.tokenId, amount);
         }
     }

@@ -6,9 +6,6 @@ import { useAsyncFn } from "react-use";
 import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { CheckIcon } from "@app/components/icons/CheckIcon";
 import classNames from "classnames";
-import { ethers } from "ethers";
-import { TrickOrTreat__factory } from "contracts/typechain";
-import addresses from "contracts/addresses/localhost.json";
 import { useToast } from "@app/utils/useToast";
 
 type Props = {
@@ -17,15 +14,6 @@ type Props = {
   name: string;
   imageUrl: string;
 };
-
-const polygonProvider = new ethers.providers.JsonRpcProvider(
-  process.env.NEXT_PUBLIC_POLYGON_RPC_ENDPOINT
-);
-
-const trickOrTreatContract = TrickOrTreat__factory.connect(
-  addresses.trickOrTreat,
-  polygonProvider
-);
 
 const useRingDoorbell = () => {
   const provider = useProvider();

@@ -1,13 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as signedMessageData from "@app/utils/signedMessageData";
 import { ethers } from "ethers";
-import { isOwner } from "@app/utils/contracts";
-import addresses from "contracts/addresses/localhost.json";
-import { TrickOrTreat__factory } from "contracts/typechain";
-
-const polygonProvider = new ethers.providers.JsonRpcProvider(
-  process.env.NEXT_PUBLIC_POLYGON_RPC_ENDPOINT
-);
+import { isOwner } from "@app/utils/nftContracts";
+import { trickOrTreatContract } from "@app/utils/contracts";
 
 if (!process.env.DEPLOYER_PRIVATE_KEY) {
   throw new Error("Missing environment variable: DEPLOYER_PRIVATE_KEY");
@@ -15,28 +10,10 @@ if (!process.env.DEPLOYER_PRIVATE_KEY) {
 
 const wallet = new ethers.Wallet(
   process.env.DEPLOYER_PRIVATE_KEY,
-  polygonProvider
+  trickOrTreatContract.provider
 );
 
-const trickOrTreatContract = TrickOrTreat__factory.connect(
-  addresses.trickOrTreat,
-  wallet
-);
-
-const extractErrorMessage = (error: any) => {
-  try {
-    const innerError = error.error;
-    const rpcResponseBody = innerError.body;
-    const rpcResponse = JSON.parse(rpcResponseBody);
-    const message = rpcResponse.error.message;
-    return message.replace(
-      /Error: VM Exception while processing transaction: reverted with reason string '(.*)'$/,
-      "$1"
-    );
-  } catch (e) {
-    return null;
-  }
-};
+const ownerContract = trickOrTreatContract.connect(wallet);
 
 const errorMessages = {
   BAG_FULL:
@@ -80,10 +57,7 @@ export default async function handler(
   }
 
   try {
-    const tx = await trickOrTreatContract.ringDoorbell(
-      data.visitor,
-      data.place
-    );
+    const tx = await ownerContract.ringDoorbell(data.visitor, data.place);
     await tx.wait();
   } catch (error) {
     if (!(error instanceof Error)) {

@@ -6,7 +6,7 @@
     "start": "hardhat node",
     "test": "hardhat test",
     "compile": "hardhat clean && hardhat compile",
-    "typechain": "rm -rf ./typechain && typechain --show-stack-traces --target ethers-v5 --out-dir ./typechain 'artifacts/!(build-info)/**/!(*.dbg*)*.json'",
+    "typechain": "typechain --show-stack-traces --target ethers-v5 --out-dir ./typechain 'artifacts/!(build-info)/**/!(*.dbg*)*.json'",
     "build": "yarn compile && yarn typechain",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network mumbai",

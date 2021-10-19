@@ -14,27 +14,25 @@ async function start() {
     ? JSON.parse((await fs.readFile(addressesPath)).toString())
     : {};
 
-  if (addressBook.trickOrTreat) {
+  if (addressBook.trickOrTreat && !process.env.REPLACE_ADDRESS) {
     throw new Error(
       "This would overwrite the address book. Clear it first if you'd like to deploy new instances."
     );
   }
 
-  if (!addressBook.trickOrTreat) {
-    console.log("Deploying TrickOrTreat...");
-    const ContractFactory = (await ethers.getContractFactory(
-      "TrickOrTreat"
-    )) as TrickOrTreat__factory;
-    const contract = (await upgrades.deployProxy(
-      ContractFactory
-    )) as TrickOrTreat;
+  console.log("Deploying TrickOrTreat...");
+  const ContractFactory = (await ethers.getContractFactory(
+    "TrickOrTreat"
+  )) as TrickOrTreat__factory;
+  const contract = (await upgrades.deployProxy(
+    ContractFactory
+  )) as TrickOrTreat;
 
-    console.log("Deploy TX: ", contract.deployTransaction.hash);
-    await contract.deployed();
-    console.log("TrickOrTreat deployed at ", contract.address);
-    addressBook.trickOrTreat = contract.address;
-    await fs.writeFile(addressesPath, JSON.stringify(addressBook, null, 2));
-  }
+  console.log("Deploy TX: ", contract.deployTransaction.hash);
+  await contract.deployed();
+  console.log("TrickOrTreat deployed at ", contract.address);
+  addressBook.trickOrTreat = contract.address;
+  await fs.writeFile(addressesPath, JSON.stringify(addressBook, null, 2));
 
   console.log("Deployed!");
 }

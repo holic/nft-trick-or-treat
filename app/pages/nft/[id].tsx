@@ -9,20 +9,10 @@ import { Container } from "@app/components/Container";
 import { opensea } from "@app/utils/opensea";
 import shuffle from "lodash/shuffle";
 import { ethers } from "ethers";
-import { TrickOrTreat__factory } from "contracts/typechain";
-import addresses from "contracts/addresses/localhost.json";
 import { TypedListener } from "contracts/typechain/common";
 import { Place } from "@app/components/Place";
 import { useToast } from "@app/utils/useToast";
-
-const polygonProvider = new ethers.providers.JsonRpcProvider(
-  process.env.NEXT_PUBLIC_POLYGON_RPC_ENDPOINT
-);
-
-const trickOrTreatContract = TrickOrTreat__factory.connect(
-  addresses.trickOrTreat,
-  polygonProvider
-);
+import { trickOrTreatContract } from "@app/utils/contracts";
 
 const useVisitor = () => {
   const router = useRouter();
