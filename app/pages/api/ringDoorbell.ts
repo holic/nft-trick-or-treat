@@ -15,7 +15,7 @@ const hash = (input: string) => createHash("sha256").update(input).digest();
 const wallets = process.env.DOORMAN_PRIVATE_KEYS.split(",").map(
   (privateKey) =>
     new NonceManager(
-      new ethers.Wallet(privateKey, trickOrTreatContract.provider)
+      new ethers.Wallet(privateKey.trim(), trickOrTreatContract.provider)
     )
 );
 
