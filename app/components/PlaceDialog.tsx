@@ -15,6 +15,7 @@ type Props = {
   onClose: () => void;
   visitor: OpenSeaAsset;
   place: OpenSeaAsset;
+  onVisited: () => void;
 };
 
 const useRingDoorbell = () => {
@@ -47,7 +48,13 @@ const useRingDoorbell = () => {
   return useAsyncFn(ringDoorbell, [provider]);
 };
 
-export const PlaceDialog = ({ isOpen, onClose, visitor, place }: Props) => {
+export const PlaceDialog = ({
+  isOpen,
+  onClose,
+  visitor,
+  place,
+  onVisited,
+}: Props) => {
   const placeImageUrl = place.imageUrl.replace(/=s\d+$/, "=s800");
   const [{ loading, error, value }, ringDoorbell] = useRingDoorbell();
 
@@ -136,7 +143,9 @@ export const PlaceDialog = ({ isOpen, onClose, visitor, place }: Props) => {
                           contractAddress: place.tokenAddress,
                           tokenId: place.tokenId,
                         },
-                      }).finally(onClose);
+                      })
+                        .then(onVisited)
+                        .finally(onClose);
                     }}
                     disabled={loading || value}
                   >

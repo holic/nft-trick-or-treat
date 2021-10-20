@@ -62,7 +62,7 @@ export default async function handler(
 
   // Pick a wallet based on the hash of visitor/place, so retries flow through the same nonce manager
   const visitorPlaceHash = hash(JSON.stringify([data.visitor, data.place]));
-  const wallet = wallets[visitorPlaceHash.readInt8() % wallets.length];
+  const wallet = wallets[visitorPlaceHash.readUInt32LE() % wallets.length];
 
   try {
     const tx = await trickOrTreatContract

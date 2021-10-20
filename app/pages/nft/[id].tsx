@@ -90,8 +90,6 @@ const Places = () => {
     };
   }, [visitor?.tokenAddress, visitor?.tokenId]);
 
-  console.log(assets.value?.[0]);
-
   if (!visitor) return null;
 
   return (

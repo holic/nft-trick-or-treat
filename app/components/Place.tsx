@@ -18,6 +18,7 @@ type Props = {
 
 export const Place = ({ visitor, place, name }: Props) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [hasVisited, setVisited] = useState(false);
 
   return (
     <>
@@ -40,15 +41,15 @@ export const Place = ({ visitor, place, name }: Props) => {
             }}
           ></span>
 
-          {/* TODO: Wire this up */}
-          {/* 
-          <span
-            className={classNames(
-              "absolute bottom-2 right-2 text-2xl text-white bg-yellow-600 transition duration-500 rounded-full p-0.5 group-hover:opacity-50"
-            )}
-          >
-            <CheckIcon />
-          </span> */}
+          {hasVisited ? (
+            <span
+              className={classNames(
+                "absolute bottom-2 right-2 text-2xl text-white bg-yellow-600 transition duration-500 rounded-full p-0.5 group-hover:opacity-50"
+              )}
+            >
+              <CheckIcon />
+            </span>
+          ) : null}
         </button>
         <div className="text-center text-xs">{name}</div>
       </div>
@@ -58,6 +59,7 @@ export const Place = ({ visitor, place, name }: Props) => {
         onClose={() => setDialogOpen(false)}
         visitor={visitor}
         place={place}
+        onVisited={() => setVisited(true)}
       />
     </>
   );
