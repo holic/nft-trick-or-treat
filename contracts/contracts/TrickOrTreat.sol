@@ -1,12 +1,15 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
 import "./util/Random.sol";
 
 import "hardhat/console.sol";
 
-contract TrickOrTreat is OwnableUpgradeable {
+contract TrickOrTreat is AccessControlUpgradeable {
+    bytes32 public constant DOORMAN = keccak256("DOORMAN");
+
     // I started with ERC-1155, but realized I wanted to store balances in relation to
     // an NFT rather than a wallet. Because an NFT is a contract address + token ID, we
     // need to do our own thing. Not great, but this approach let's us move.
@@ -31,7 +34,8 @@ contract TrickOrTreat is OwnableUpgradeable {
     event Treated(address indexed visitorContractAddress, uint256 indexed visitorTokenId, uint16 amount);
 
     function initialize() public initializer {
-        __Ownable_init();
+        __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function getVisitorHash(NFT memory visitor) internal pure returns (uint256) {
@@ -43,7 +47,7 @@ contract TrickOrTreat is OwnableUpgradeable {
         return treats[visitorHash];
     }
 
-    function ringDoorbell(NFT memory visitor, NFT memory place) public onlyOwner {
+    function ringDoorbell(NFT memory visitor, NFT memory place) public onlyRole(DOORMAN) {
         // Our backend will determine if the visitor and place are valid addresses pointing to
         // allowed NFTs on Ethereum mainnet and that the wallet owns the visitor.
 

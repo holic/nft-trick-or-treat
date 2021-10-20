@@ -24,7 +24,10 @@ export default {
     },
     mumbai: {
       url: process.env.POLYGON_MUMBAI_URL,
-      accounts: [process.env.POLYGON_MUMBAI_DEPLOYER_PRIVATE_KEY],
+      accounts: [
+        process.env.POLYGON_MUMBAI_DEPLOYER_PRIVATE_KEY,
+        ...(process.env.POLYGON_MUMBAI_DOORMAN_PRIVATE_KEYS?.split(",") || []),
+      ],
     },
   },
 };
