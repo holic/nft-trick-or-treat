@@ -68,7 +68,9 @@ export default async function handler(
     const tx = await trickOrTreatContract
       .connect(wallet)
       .ringDoorbell(data.visitor, data.place);
-    await tx.wait();
+    const receipt = await tx.wait();
+
+    res.status(200).json({ success: true });
   } catch (error) {
     if (!(error instanceof Error)) {
       throw error;
@@ -86,6 +88,4 @@ export default async function handler(
     console.log("unknown error while creating tx", typeof error);
     throw error;
   }
-
-  res.status(200).json({ success: true });
 }
