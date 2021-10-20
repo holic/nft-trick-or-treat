@@ -7,6 +7,7 @@ import { WalletConnectButton } from "@app/components/WalletConnectButton";
 import { Container } from "@app/components/Container";
 import { ToastProvider } from "@app/utils/useToast";
 import { Toasts } from "@app/components/Toasts";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 
 type Props = {
   children: React.ReactNode;
@@ -53,6 +54,17 @@ export const Layout = ({ children }: Props) => (
       <WalletProvider
         cacheProvider
         network="mainnet"
+        providerOptions={{
+          walletconnect: {
+            package: WalletConnectProvider,
+            options: {
+              network: "mainnet",
+              rpc: {
+                1: process.env.NEXT_PUBLIC_ETHEREUM_RPC_ENDPOINT,
+              },
+            },
+          },
+        }}
         fallback={
           <>
             <TopBar>
