@@ -67,7 +67,7 @@ export const PlaceDialog = ({
       <Transition show={isOpen} as={Fragment}>
         <Dialog
           onClose={onClose}
-          className="fixed inset-0 z-10 overflow-y-auto backdrop-blur-xs bg-gray-900 bg-opacity-40"
+          className="fixed inset-0 z-10 overflow-y-auto backdrop-blur-xs bg-gray-900 bg-opacity-80"
         >
           <Dialog.Overlay className="fixed inset-0" />
           <div className="flex flex-col pt-[10vh] pb-[60vh] items-center">
@@ -125,7 +125,11 @@ export const PlaceDialog = ({
                 <div className="absolute -top-4 -left-6 flex items-start">
                   <Player imageUrl={visitor.imageUrl} />
                   <div className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg">
-                    Well, this is spooky. Are you sure about this? 😰
+                    {value ? (
+                      <>I think we've trick-or-treated here. 👍</>
+                    ) : (
+                      <>Well, this is spooky. Are you sure about this? 😰</>
+                    )}
                   </div>
                 </div>
 
@@ -137,28 +141,30 @@ export const PlaceDialog = ({
                   >
                     Let's get out of here
                   </button>
-                  <button
-                    type="button"
-                    className="px-4 py-3 rounded-lg bg-yellow-500 text-xl text-black transition hover:bg-yellow-300 hover:scale-105 disabled:saturate-50 disabled:opacity-60 disabled:cursor-default flex items-center gap-2"
-                    onClick={() => {
-                      ringDoorbell({
-                        visitor: {
-                          contractAddress: visitor.tokenAddress,
-                          tokenId: visitor.tokenId,
-                        },
-                        place: {
-                          contractAddress: place.tokenAddress,
-                          tokenId: place.tokenId,
-                        },
-                      })
-                        .then(onVisited)
-                        .finally(onClose);
-                    }}
-                    disabled={loading || value}
-                  >
-                    Ring the doorbell
-                    {loading ? <PendingIcon /> : null}
-                  </button>
+                  {!value ? (
+                    <button
+                      type="button"
+                      className="px-4 py-3 rounded-lg bg-yellow-500 text-xl text-black transition hover:bg-yellow-300 hover:scale-105 disabled:saturate-50 disabled:opacity-60 disabled:cursor-default flex items-center gap-2"
+                      onClick={() => {
+                        ringDoorbell({
+                          visitor: {
+                            contractAddress: visitor.tokenAddress,
+                            tokenId: visitor.tokenId,
+                          },
+                          place: {
+                            contractAddress: place.tokenAddress,
+                            tokenId: place.tokenId,
+                          },
+                        })
+                          .then(onVisited)
+                          .finally(onClose);
+                      }}
+                      disabled={loading}
+                    >
+                      Ring the doorbell
+                      {loading ? <PendingIcon /> : null}
+                    </button>
+                  ) : null}
                 </div>
               </div>
             </Transition.Child>

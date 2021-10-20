@@ -10,7 +10,7 @@ export const Toasts = () => {
         {toasts.map((toast) => (
           <Transition.Child
             key={toast.id}
-            className="pointer-events-auto bg-black bg-opacity-80 backdrop-blur-sm shadow-xl rounded-md px-3 py-2 cursor-pointer hover:opacity-60 transition duration-100 text-gray-200"
+            className="pointer-events-auto bg-black bg-opacity-80 backdrop-blur-sm shadow-xl rounded-md px-3 py-2 cursor-pointer hover:opacity-60 transition duration-100 text-gray-200 text-xl"
             enter="ease-out"
             enterFrom="opacity-0"
             enterTo="opacity-100"

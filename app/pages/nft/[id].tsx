@@ -90,16 +90,17 @@ const Places = () => {
     };
   }, [visitor?.tokenAddress, visitor?.tokenId]);
 
-  if (!visitor) return null;
+  if (!visitor || assets.loading) {
+    return (
+      <span className="text-4xl">
+        <PendingIcon />
+      </span>
+    );
+  }
 
   return (
     <>
       <div className="flex flex-wrap gap-6">
-        {assets.loading ? (
-          <span className="text-4xl">
-            <PendingIcon />
-          </span>
-        ) : null}
         {assets.value?.map((asset) => (
           <Place
             key={`${asset.tokenAddress}:${asset.tokenId}`}
@@ -164,7 +165,7 @@ const PlayerStatus = () => {
   return (
     <>
       <Player imageUrl={nft?.imageUrl} />
-      <span className="text-lg">🍬 {treats} treats</span>
+      <span className="text-xl">🍬 {treats} treats</span>
     </>
   );
 };
