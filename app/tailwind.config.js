@@ -9,6 +9,17 @@ module.exports = {
       colors: {
         gray: colors.warmGray,
       },
+      backdropBlur: {
+        xs: "2px",
+      },
+      keyframes: {
+        rainfall: {
+          "100%": { marginTop: "200%", marginLeft: "30%" },
+        },
+      },
+      animation: {
+        rainfall: "rainfall 1.5s linear infinite",
+      },
     },
   },
   variants: {

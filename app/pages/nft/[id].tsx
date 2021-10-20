@@ -13,6 +13,7 @@ import { TypedListener } from "contracts/typechain/common";
 import { Place } from "@app/components/Place";
 import { useToast } from "@app/utils/useToast";
 import { trickOrTreatContract } from "@app/utils/contracts";
+import { Player } from "@app/components/Player";
 
 const useVisitor = () => {
   const router = useRouter();
@@ -20,8 +21,22 @@ const useVisitor = () => {
     ? router.query.id[0]
     : router.query.id;
 
-  const [contractAddress, tokenId] = id ? id.split(":") : [];
-  return { contractAddress, tokenId };
+  const [tokenAddress, tokenId] = id ? id.split(":") : [];
+
+  const asset = useAsync(async () => {
+    return await opensea.api.getAsset({
+      tokenAddress,
+      tokenId,
+    });
+  }, []);
+
+  return asset.value
+    ? {
+        tokenAddress: asset.value.tokenAddress,
+        tokenId: asset.value.tokenId || "",
+        imageUrl: asset.value.imageUrl,
+      }
+    : null;
 };
 
 const Places = () => {
@@ -38,8 +53,10 @@ const Places = () => {
   }, []);
 
   useEffect(() => {
+    if (!visitor) return;
+
     const treatedFilter = trickOrTreatContract.filters.Treated(
-      visitor.contractAddress,
+      visitor.tokenAddress,
       ethers.BigNumber.from(visitor.tokenId)
     );
     // TODO: figure out how to make a better type signature here
@@ -51,7 +68,7 @@ const Places = () => {
     };
 
     const trickedFilter = trickOrTreatContract.filters.Tricked(
-      visitor.contractAddress,
+      visitor.tokenAddress,
       ethers.BigNumber.from(visitor.tokenId)
     );
     // TODO: figure out how to make a better type signature here
@@ -71,42 +88,52 @@ const Places = () => {
       trickOrTreatContract.off(treatedFilter, treatedListener);
       trickOrTreatContract.off(trickedFilter, trickedListener);
     };
-  }, [visitor.contractAddress, visitor.tokenId]);
+  }, [visitor?.tokenAddress, visitor?.tokenId]);
+
+  if (!visitor) return null;
 
   return (
-    <div className="flex flex-wrap gap-6">
-      {assets.loading ? (
-        <span className="text-4xl">
-          <PendingIcon />
-        </span>
-      ) : null}
-      {assets.value?.map((asset) => (
-        <Place
-          key={`${asset.tokenAddress}:${asset.tokenId}`}
-          visitor={visitor}
-          place={{
-            contractAddress: asset.tokenAddress,
-            tokenId: asset.tokenId || "",
-          }}
-          name={asset.description.replace(/^.*Lot \d+ - /, "")}
-          imageUrl={asset.imageUrl}
-        />
-      ))}
-    </div>
+    <>
+      <div className="flex flex-wrap gap-6">
+        {assets.loading ? (
+          <span className="text-4xl">
+            <PendingIcon />
+          </span>
+        ) : null}
+        {assets.value?.map((asset) => (
+          <Place
+            key={`${asset.tokenAddress}:${asset.tokenId}`}
+            visitor={visitor}
+            place={{
+              ...asset,
+              tokenId: asset.tokenId || "",
+            }}
+            name={asset.description.replace(/^.*Lot \d+ - /, "")}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 
-const Player = () => {
+const PlayerStatus = () => {
   const visitor = useVisitor();
   const [treats, setTreats] = useState(0);
 
   useEffect(() => {
-    trickOrTreatContract.bagContents(visitor).then((amount) => {
-      setTreats(amount);
-    });
+    if (!visitor) return;
+
+    trickOrTreatContract
+      .bagContents({
+        contractAddress: visitor.tokenAddress,
+        tokenId: visitor.tokenId,
+      })
+      .then((amount) => {
+        setTreats(amount);
+      });
 
     const treatedFilter = trickOrTreatContract.filters.Treated(
-      visitor.contractAddress,
+      visitor.tokenAddress,
       ethers.BigNumber.from(visitor.tokenId)
     );
     // TODO: figure out how to make a better type signature here
@@ -123,26 +150,20 @@ const Player = () => {
     return () => {
       trickOrTreatContract.off(treatedFilter, treatedListener);
     };
-  }, [visitor.contractAddress, visitor.tokenId]);
+  }, [visitor?.tokenAddress, visitor?.tokenId]);
 
   const { value: nft } = useAsync(async () => {
+    if (!visitor) return;
+
     return await opensea.api.getAsset({
-      tokenAddress: visitor.contractAddress,
+      tokenAddress: visitor.tokenAddress,
       tokenId: visitor.tokenId,
     });
-  }, [visitor.contractAddress, visitor.tokenId]);
+  }, [visitor?.tokenAddress, visitor?.tokenId]);
 
   return (
     <>
-      <a className="group relative">
-        <div className="rounded-full overflow-hidden border-8 border-gray-900 bg-gray-700 -translate-y-1">
-          <img src={nft?.imageUrl} className="w-32 h-32" />
-        </div>
-        <img
-          src="/pumpkin-bucket.png"
-          className="w-16 h-16 absolute bottom-1 -right-1"
-        />
-      </a>
+      <Player imageUrl={nft?.imageUrl} />
       <span className="text-lg">🍬 {treats} treats</span>
     </>
   );
@@ -154,7 +175,7 @@ const NFTPage: NextPage = () => (
       <div className="flex pt-16 pb-64 gap-8">
         <div className="flex flex-shrink-0 items-center flex-col flex-wrap">
           <Suspense fallback={<PendingIcon />}>
-            <Player />
+            <PlayerStatus />
           </Suspense>
         </div>
 

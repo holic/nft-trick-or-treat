@@ -4,18 +4,20 @@ import { ethers } from "ethers";
 import { isOwner } from "@app/utils/nftContracts";
 import { trickOrTreatContract } from "@app/utils/contracts";
 import { NonceManager } from "@ethersproject/experimental";
+import { createHash } from "crypto";
 
-if (!process.env.DEPLOYER_PRIVATE_KEY) {
-  throw new Error("Missing environment variable: DEPLOYER_PRIVATE_KEY");
+if (!process.env.DOORMAN_PRIVATE_KEYS) {
+  throw new Error("Missing environment variable: DOORMAN_PRIVATE_KEYS");
 }
 
-const wallet = new ethers.Wallet(
-  process.env.DEPLOYER_PRIVATE_KEY,
-  trickOrTreatContract.provider
-);
+const hash = (input: string) => createHash("sha256").update(input).digest();
 
-const nonceManager = new NonceManager(wallet);
-const ownerContract = trickOrTreatContract.connect(nonceManager);
+const wallets = process.env.DOORMAN_PRIVATE_KEYS.split(",").map(
+  (privateKey) =>
+    new NonceManager(
+      new ethers.Wallet(privateKey, trickOrTreatContract.provider)
+    )
+);
 
 const errorMessages = {
   BAG_FULL:
@@ -58,8 +60,14 @@ export default async function handler(
     });
   }
 
+  // Pick a wallet based on the hash of visitor/place, so retries flow through the same nonce manager
+  const visitorPlaceHash = hash(JSON.stringify([data.visitor, data.place]));
+  const wallet = wallets[visitorPlaceHash.readUInt32LE() % wallets.length];
+
   try {
-    const tx = await ownerContract.ringDoorbell(data.visitor, data.place);
+    const tx = await trickOrTreatContract
+      .connect(wallet)
+      .ringDoorbell(data.visitor, data.place);
     await tx.wait();
   } catch (error) {
     if (!(error instanceof Error)) {

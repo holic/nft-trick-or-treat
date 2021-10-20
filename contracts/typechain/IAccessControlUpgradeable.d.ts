@@ -19,37 +19,15 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface TrickOrTreatInterface extends ethers.utils.Interface {
+interface IAccessControlUpgradeableInterface extends ethers.utils.Interface {
   functions: {
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "DOORMAN()": FunctionFragment;
-    "bagContents((address,uint256))": FunctionFragment;
-    "dailyVisits(uint256)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "initialize()": FunctionFragment;
-    "placeVisits(uint256)": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "ringDoorbell((address,uint256),(address,uint256))": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "treats(uint256)": FunctionFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "DOORMAN", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "bagContents",
-    values: [{ contractAddress: string; tokenId: BigNumberish }]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "dailyVisits",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
     values: [BytesLike]
@@ -63,14 +41,6 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "placeVisits",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "renounceRole",
     values: [BytesLike, string]
   ): string;
@@ -78,74 +48,28 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
     functionFragment: "revokeRole",
     values: [BytesLike, string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "ringDoorbell",
-    values: [
-      { contractAddress: string; tokenId: BigNumberish },
-      { contractAddress: string; tokenId: BigNumberish }
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "treats",
-    values: [BigNumberish]
-  ): string;
 
-  decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "DOORMAN", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "bagContents",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "dailyVisits",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "getRoleAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "placeVisits",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceRole",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ringDoorbell",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "treats", data: BytesLike): Result;
 
   events: {
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
-    "Treated(address,uint256,uint16)": EventFragment;
-    "Tricked(address,uint256,uint16)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Treated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Tricked"): EventFragment;
 }
 
 export type RoleAdminChangedEvent = TypedEvent<
@@ -164,23 +88,7 @@ export type RoleRevokedEvent = TypedEvent<
   [string, string, string] & { role: string; account: string; sender: string }
 >;
 
-export type TreatedEvent = TypedEvent<
-  [string, BigNumber, number] & {
-    visitorContractAddress: string;
-    visitorTokenId: BigNumber;
-    amount: number;
-  }
->;
-
-export type TrickedEvent = TypedEvent<
-  [string, BigNumber, number] & {
-    visitorContractAddress: string;
-    visitorTokenId: BigNumber;
-    amount: number;
-  }
->;
-
-export class TrickOrTreat extends BaseContract {
+export class IAccessControlUpgradeable extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -221,23 +129,9 @@ export class TrickOrTreat extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: TrickOrTreatInterface;
+  interface: IAccessControlUpgradeableInterface;
 
   functions: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    DOORMAN(overrides?: CallOverrides): Promise<[string]>;
-
-    bagContents(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: CallOverrides
-    ): Promise<[number]>;
-
-    dailyVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[number]>;
-
     getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
 
     grantRole(
@@ -252,15 +146,6 @@ export class TrickOrTreat extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    initialize(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    placeVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     renounceRole(
       role: BytesLike,
       account: string,
@@ -272,31 +157,7 @@ export class TrickOrTreat extends BaseContract {
       account: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    ringDoorbell(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      place: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    treats(arg0: BigNumberish, overrides?: CallOverrides): Promise<[number]>;
   };
-
-  DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  DOORMAN(overrides?: CallOverrides): Promise<string>;
-
-  bagContents(
-    visitor: { contractAddress: string; tokenId: BigNumberish },
-    overrides?: CallOverrides
-  ): Promise<number>;
-
-  dailyVisits(arg0: BigNumberish, overrides?: CallOverrides): Promise<number>;
 
   getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
@@ -312,15 +173,6 @@ export class TrickOrTreat extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  initialize(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  placeVisits(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   renounceRole(
     role: BytesLike,
     account: string,
@@ -333,31 +185,7 @@ export class TrickOrTreat extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  ringDoorbell(
-    visitor: { contractAddress: string; tokenId: BigNumberish },
-    place: { contractAddress: string; tokenId: BigNumberish },
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  supportsInterface(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  treats(arg0: BigNumberish, overrides?: CallOverrides): Promise<number>;
-
   callStatic: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    DOORMAN(overrides?: CallOverrides): Promise<string>;
-
-    bagContents(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: CallOverrides
-    ): Promise<number>;
-
-    dailyVisits(arg0: BigNumberish, overrides?: CallOverrides): Promise<number>;
-
     getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
 
     grantRole(
@@ -372,13 +200,6 @@ export class TrickOrTreat extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    initialize(overrides?: CallOverrides): Promise<void>;
-
-    placeVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     renounceRole(
       role: BytesLike,
       account: string,
@@ -390,19 +211,6 @@ export class TrickOrTreat extends BaseContract {
       account: string,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    ringDoorbell(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      place: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    treats(arg0: BigNumberish, overrides?: CallOverrides): Promise<number>;
   };
 
   filters: {
@@ -459,75 +267,9 @@ export class TrickOrTreat extends BaseContract {
       [string, string, string],
       { role: string; account: string; sender: string }
     >;
-
-    "Treated(address,uint256,uint16)"(
-      visitorContractAddress?: string | null,
-      visitorTokenId?: BigNumberish | null,
-      amount?: null
-    ): TypedEventFilter<
-      [string, BigNumber, number],
-      {
-        visitorContractAddress: string;
-        visitorTokenId: BigNumber;
-        amount: number;
-      }
-    >;
-
-    Treated(
-      visitorContractAddress?: string | null,
-      visitorTokenId?: BigNumberish | null,
-      amount?: null
-    ): TypedEventFilter<
-      [string, BigNumber, number],
-      {
-        visitorContractAddress: string;
-        visitorTokenId: BigNumber;
-        amount: number;
-      }
-    >;
-
-    "Tricked(address,uint256,uint16)"(
-      visitorContractAddress?: string | null,
-      visitorTokenId?: BigNumberish | null,
-      amount?: null
-    ): TypedEventFilter<
-      [string, BigNumber, number],
-      {
-        visitorContractAddress: string;
-        visitorTokenId: BigNumber;
-        amount: number;
-      }
-    >;
-
-    Tricked(
-      visitorContractAddress?: string | null,
-      visitorTokenId?: BigNumberish | null,
-      amount?: null
-    ): TypedEventFilter<
-      [string, BigNumber, number],
-      {
-        visitorContractAddress: string;
-        visitorTokenId: BigNumber;
-        amount: number;
-      }
-    >;
   };
 
   estimateGas: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    DOORMAN(overrides?: CallOverrides): Promise<BigNumber>;
-
-    bagContents(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    dailyVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getRoleAdmin(
       role: BytesLike,
       overrides?: CallOverrides
@@ -545,15 +287,6 @@ export class TrickOrTreat extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    initialize(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    placeVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     renounceRole(
       role: BytesLike,
       account: string,
@@ -565,38 +298,9 @@ export class TrickOrTreat extends BaseContract {
       account: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    ringDoorbell(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      place: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    treats(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    DEFAULT_ADMIN_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    DOORMAN(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    bagContents(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    dailyVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getRoleAdmin(
       role: BytesLike,
       overrides?: CallOverrides
@@ -614,15 +318,6 @@ export class TrickOrTreat extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    initialize(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    placeVisits(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     renounceRole(
       role: BytesLike,
       account: string,
@@ -633,22 +328,6 @@ export class TrickOrTreat extends BaseContract {
       role: BytesLike,
       account: string,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    ringDoorbell(
-      visitor: { contractAddress: string; tokenId: BigNumberish },
-      place: { contractAddress: string; tokenId: BigNumberish },
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    treats(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
