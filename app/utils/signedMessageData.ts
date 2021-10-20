@@ -1,9 +1,15 @@
 import { ethers } from "ethers";
-import { NFT } from "./types";
 
+// TODO: extract this from contract method?
 export type RingDoorbellMessage = {
-  visitor: NFT;
-  place: NFT;
+  visitor: {
+    contractAddress: string;
+    tokenId: string;
+  };
+  place: {
+    contractAddress: string;
+    tokenId: string;
+  };
 };
 
 export type Envelope<T> = {
