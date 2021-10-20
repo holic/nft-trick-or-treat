@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useAsync } from "react-use";
+import { useAsync, useAsyncFn } from "react-use";
 import { Layout } from "@app/components/Layout";
 import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { Suspense } from "@app/components/Suspense";
@@ -118,37 +118,37 @@ const Places = () => {
 
 const PlayerStatus = () => {
   const visitor = useVisitor();
-  const [treats, setTreats] = useState(0);
+
+  const [bagContents, fetchBagContents] = useAsyncFn(async () => {
+    if (!visitor) return;
+    return trickOrTreatContract.bagContents({
+      contractAddress: visitor.tokenAddress,
+      tokenId: visitor.tokenId,
+    });
+  }, [visitor?.tokenAddress, visitor?.tokenId]);
+
+  const treats = bagContents?.value || 0;
 
   useEffect(() => {
     if (!visitor) return;
 
-    trickOrTreatContract
-      .bagContents({
-        contractAddress: visitor.tokenAddress,
-        tokenId: visitor.tokenId,
-      })
-      .then((amount) => {
-        setTreats(amount);
-      });
+    fetchBagContents();
 
     const treatedFilter = trickOrTreatContract.filters.Treated(
       visitor.tokenAddress,
       ethers.BigNumber.from(visitor.tokenId)
     );
-    // TODO: figure out how to make a better type signature here
-    const treatedListener: TypedListener<
-      [string, ethers.BigNumber, number],
-      {}
-    > = (address, tokenId, amount) => {
-      // TODO: just re-query bag instead of updating amount?
-      setTreats(Math.max(treats, amount));
-    };
+    const trickedFilter = trickOrTreatContract.filters.Tricked(
+      visitor.tokenAddress,
+      ethers.BigNumber.from(visitor.tokenId)
+    );
 
-    trickOrTreatContract.on(treatedFilter, treatedListener);
+    trickOrTreatContract.on(treatedFilter, fetchBagContents);
+    trickOrTreatContract.on(trickedFilter, fetchBagContents);
 
     return () => {
-      trickOrTreatContract.off(treatedFilter, treatedListener);
+      trickOrTreatContract.off(treatedFilter, fetchBagContents);
+      trickOrTreatContract.off(trickedFilter, fetchBagContents);
     };
   }, [visitor?.tokenAddress, visitor?.tokenId]);
 
