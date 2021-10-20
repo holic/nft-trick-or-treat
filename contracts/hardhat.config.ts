@@ -33,7 +33,10 @@ export default {
     },
     matic: {
       url: process.env.POLYGON_MAINNET_URL,
-      accounts: [process.env.POLYGON_MAINNET_DEPLOYER_PRIVATE_KEY],
+      accounts: [
+        process.env.POLYGON_MAINNET_DEPLOYER_PRIVATE_KEY,
+        ...(process.env.POLYGON_MAINNET_DOORMAN_PRIVATE_KEYS?.split(",") || []),
+      ],
     },
     mumbai: {
       url: process.env.POLYGON_MUMBAI_URL,
