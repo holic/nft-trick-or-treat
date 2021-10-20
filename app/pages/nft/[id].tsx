@@ -135,7 +135,7 @@ const Player = () => {
   return (
     <>
       <a className="group relative">
-        <div className="rounded-full overflow-hidden border-8 border-gray-900 bg-gray-900 -translate-y-1">
+        <div className="rounded-full overflow-hidden border-8 border-gray-900 bg-gray-700 -translate-y-1">
           <img src={nft?.imageUrl} className="w-32 h-32" />
         </div>
         <img
