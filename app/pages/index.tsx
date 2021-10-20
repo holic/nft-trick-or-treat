@@ -32,6 +32,8 @@ const NFTs = () => {
           "0x986aea67c7d6a15036e18678065eb663fc5be883",
           // Spicy Pumpkins
           "0x07a13eea351d501cfedf96bda8528bbc71ca5d80",
+          // DeadFellaz
+          "0x2acab3dea77832c09420663b0e1cb386031ba17b",
         ],
         limit: 50,
       }),
