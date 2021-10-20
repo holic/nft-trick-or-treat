@@ -9,7 +9,7 @@ const ERC_1155_ABI = Object.freeze([
 ]);
 
 const ethereumProvider = new ethers.providers.JsonRpcProvider(
-  process.env.ETHEREUM_RPC_ENDPOINT
+  process.env.NEXT_PUBLIC_ETHEREUM_RPC_ENDPOINT
 );
 
 type NFTContract = {
