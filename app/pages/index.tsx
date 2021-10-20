@@ -34,6 +34,8 @@ const NFTs = () => {
           "0x07a13eea351d501cfedf96bda8528bbc71ca5d80",
           // DeadFellaz
           "0x2acab3dea77832c09420663b0e1cb386031ba17b",
+          // Omnimorphs
+          "0xb5f3dee204ca76e913bb3129ba0312b9f0f31d82",
         ],
         limit: 50,
       }),
@@ -44,14 +46,109 @@ const NFTs = () => {
     return shuffle(assets).slice(0, 12);
   }, [owner]);
 
+  if (nfts.loading) {
+    return (
+      <div className="text-4xl flex justify-center">
+        <PendingIcon />
+      </div>
+    );
+  }
+
+  if (nfts.error || !nfts.value) {
+    return <div>Couldn't fetch your NFTs</div>;
+  }
+
+  if (!nfts.value.length) {
+    return (
+      <div className="text-gray-400 text-lg max-w-[40ch] space-y-4">
+        <p>
+          Aww, looks like you don't have any NFTs eligible for
+          trick-or-treating. You can buy some here:
+        </p>
+        <ul className="list-disc list-inside ml-4">
+          <li>
+            <a
+              href="https://opensea.io/collection/weird-kitties"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Weird Kitties
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/omnimorphs"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Omnimorphs
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/obitsofficial"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Obits
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/niftydegen"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Nifty League DEGENs
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/gawds"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Gawds
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/spicy-pumpkins"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Spicy Pumpkins
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/deadfellaz"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              DeadFellaz
+            </a>
+          </li>
+        </ul>
+        <p>
+          Got another spooky NFT in mind?{" "}
+          <a
+            href="https://twitter.com/kingersoll"
+            target="_blank"
+            className="text-yellow-500 hover:text-white border-b border-gray-500"
+          >
+            Let me know
+          </a>{" "}
+          and I may add it! I am prioritizing lower cost NFTs so more folks can
+          participate and we can raise the floor.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-4 justify-center">
-      {nfts.loading ? (
-        <span className="text-4xl">
-          <PendingIcon />
-        </span>
-      ) : null}
-      {nfts.value?.map((nft) => (
+      {nfts.value.map((nft) => (
         <Link
           key={`${nft.tokenAddress}:${nft.tokenId}`}
           href={`/nft/${encodeURIComponent(
@@ -76,7 +173,7 @@ const NFTs = () => {
 const HomePage: NextPage = () => (
   <Layout>
     <Container>
-      <div className="text-center pt-16 pb-64 space-y-8">
+      <div className="pt-16 pb-64 flex flex-col gap-8 items-center">
         <p className="text-2xl text-yellow-400">
           Happy Halloween! Who are you bringing to trick-or-treat with you?
         </p>

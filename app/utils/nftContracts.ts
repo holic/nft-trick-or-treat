@@ -78,3 +78,5 @@ addContract("0x986aea67c7d6a15036e18678065eb663fc5be883", ERC_721_ABI);
 addContract("0x07a13eea351d501cfedf96bda8528bbc71ca5d80", ERC_721_ABI);
 // DeadFellaz
 addContract("0x2acab3dea77832c09420663b0e1cb386031ba17b", ERC_721_ABI);
+// Omnimorphs
+addContract("0xb5f3dee204ca76e913bb3129ba0312b9f0f31d82", ERC_721_ABI);
