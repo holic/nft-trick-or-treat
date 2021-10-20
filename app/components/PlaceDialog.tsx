@@ -132,6 +132,13 @@ export const PlaceDialog = ({
                 <div className="absolute bottom-0 inset-x-0 flex gap-8 p-8 justify-center">
                   <button
                     type="button"
+                    className="px-4 py-3 rounded-lg bg-gray-900 bg-opacity-80 text-xl transition hover:bg-opacity-100 hover:scale-105"
+                    onClick={onClose}
+                  >
+                    Let's get out of here
+                  </button>
+                  <button
+                    type="button"
                     className="px-4 py-3 rounded-lg bg-yellow-500 text-xl text-black transition hover:bg-yellow-300 hover:scale-105 disabled:saturate-50 disabled:opacity-60 disabled:cursor-default flex items-center gap-2"
                     onClick={() => {
                       ringDoorbell({
@@ -151,13 +158,6 @@ export const PlaceDialog = ({
                   >
                     Ring the doorbell
                     {loading ? <PendingIcon /> : null}
-                  </button>
-                  <button
-                    type="button"
-                    className="px-4 py-3 rounded-lg bg-gray-900 bg-opacity-80 text-xl transition hover:bg-opacity-100 hover:scale-105"
-                    onClick={onClose}
-                  >
-                    Let's get out of here
                   </button>
                 </div>
               </div>
