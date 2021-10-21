@@ -46,19 +46,22 @@ export default async function handler(
   const { message, signature } = req.body;
   const { address, data } = signedMessageData.parse(message, signature);
 
-  if (
-    !(await isOwner(
-      data.visitor.contractAddress,
-      address,
-      data.visitor.tokenId
-    ))
-  ) {
-    // TODO: make a generic error handler so we can throw or wrap our errors
-    res.status(400).json({
-      error: "NOT_OWNER",
-      message: "You do not own this NFT. Try one of your own?",
-    });
-  }
+  // Skip owner check for now to improve speed
+  // console.time("check owner");
+  // if (
+  //   !(await isOwner(
+  //     data.visitor.contractAddress,
+  //     address,
+  //     data.visitor.tokenId
+  //   ))
+  // ) {
+  //   // TODO: make a generic error handler so we can throw or wrap our errors
+  //   res.status(400).json({
+  //     error: "NOT_OWNER",
+  //     message: "You do not own this NFT. Try one of your own?",
+  //   });
+  // }
+  // console.timeEnd("check owner");
 
   // Pick a wallet based on the hash of visitor/place, so retries flow through the same nonce manager
   const visitorPlaceHash = hash(JSON.stringify([data.visitor, data.place]));
@@ -68,7 +71,7 @@ export default async function handler(
     const tx = await trickOrTreatContract
       .connect(wallet)
       .ringDoorbell(data.visitor, data.place);
-    const receipt = await tx.wait(0);
+    await tx.wait(1);
 
     res.status(200).json({ success: true });
   } catch (error) {
