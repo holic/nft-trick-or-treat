@@ -3,5 +3,8 @@
     "app/pages/api/**/*.ts": {
       "maxDuration": 60
     }
+  },
+  "github": {
+    "silent": true
   }
 }
