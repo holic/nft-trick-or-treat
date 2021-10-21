@@ -88,3 +88,5 @@ addContract("0x85f740958906b317de6ed79663012859067e745b", ERC_721_ABI);
 addContract("0x521f9c7505005cfa19a8e5786a9c3c9c9f5e6f42", ERC_721_ABI);
 // Ethereals
 addContract("0xfc778be06c9a58f8f3e5e99216efbb28f750bc98", ERC_721_ABI);
+// Rebel Kids
+addContract("0x3af65d01f6cde41965a2d591bb399c8f0db76afd", ERC_721_ABI);

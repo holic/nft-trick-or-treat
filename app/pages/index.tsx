@@ -44,6 +44,8 @@ const NFTs = () => {
           "0x521f9c7505005cfa19a8e5786a9c3c9c9f5e6f42",
           // Ethereals
           "0xfc778be06c9a58f8f3e5e99216efbb28f750bc98",
+          // Rebel Kids
+          "0x3af65d01f6cde41965a2d591bb399c8f0db76afd",
         ],
         limit: 50,
       }),
