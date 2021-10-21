@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/pages/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  }
+}
