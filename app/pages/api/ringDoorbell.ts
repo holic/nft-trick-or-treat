@@ -71,7 +71,7 @@ export default async function handler(
     const tx = await trickOrTreatContract
       .connect(wallet)
       .ringDoorbell(data.visitor, data.place);
-    await tx.wait(1);
+    // await tx.wait(1);
 
     res.status(200).json({ success: true });
   } catch (error) {
