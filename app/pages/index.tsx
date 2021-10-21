@@ -36,6 +36,12 @@ const NFTs = () => {
           "0x2acab3dea77832c09420663b0e1cb386031ba17b",
           // Omnimorphs
           "0xb5f3dee204ca76e913bb3129ba0312b9f0f31d82",
+          // Sad Girls
+          "0x335eeef8e93a7a757d9e7912044d9cd264e2b2d8",
+          // Wicked Craniums
+          "0x85f740958906b317de6ed79663012859067e745b",
+          // Forgotten Runes Wizard Cult
+          "0x521f9c7505005cfa19a8e5786a9c3c9c9f5e6f42",
         ],
         limit: 50,
       }),

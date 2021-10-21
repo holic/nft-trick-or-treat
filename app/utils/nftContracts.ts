@@ -80,3 +80,9 @@ addContract("0x07a13eea351d501cfedf96bda8528bbc71ca5d80", ERC_721_ABI);
 addContract("0x2acab3dea77832c09420663b0e1cb386031ba17b", ERC_721_ABI);
 // Omnimorphs
 addContract("0xb5f3dee204ca76e913bb3129ba0312b9f0f31d82", ERC_721_ABI);
+// Sad Girls
+addContract("0x335eeef8e93a7a757d9e7912044d9cd264e2b2d8", ERC_721_ABI);
+// Wicked Craniums
+addContract("0x85f740958906b317de6ed79663012859067e745b", ERC_721_ABI);
+// Forgotten Runes Wizard Cult
+addContract("0x521f9c7505005cfa19a8e5786a9c3c9c9f5e6f42", ERC_721_ABI);
