@@ -86,3 +86,5 @@ addContract("0x335eeef8e93a7a757d9e7912044d9cd264e2b2d8", ERC_721_ABI);
 addContract("0x85f740958906b317de6ed79663012859067e745b", ERC_721_ABI);
 // Forgotten Runes Wizard Cult
 addContract("0x521f9c7505005cfa19a8e5786a9c3c9c9f5e6f42", ERC_721_ABI);
+// Ethereals
+addContract("0xfc778be06c9a58f8f3e5e99216efbb28f750bc98", ERC_721_ABI);
