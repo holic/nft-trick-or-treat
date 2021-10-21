@@ -137,6 +137,15 @@ const NFTs = () => {
               DeadFellaz
             </a>
           </li>
+          <li>
+            <a
+              href="https://opensea.io/collection/sadgirlsbar"
+              target="_blank"
+              className="text-yellow-500 hover:text-white border-b border-gray-500"
+            >
+              Sad Girls
+            </a>
+          </li>
         </ul>
         <p>
           Got another spooky NFT in mind?{" "}
