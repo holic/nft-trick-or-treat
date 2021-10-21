@@ -14,7 +14,8 @@ module.exports = {
       },
       keyframes: {
         rainfall: {
-          "100%": { marginTop: "200%", marginLeft: "30%" },
+          "0%": { transform: "rotate(-12deg)" },
+          "100%": { transform: "translate(250px, 1000px) rotate(-12deg)" },
         },
       },
       animation: {

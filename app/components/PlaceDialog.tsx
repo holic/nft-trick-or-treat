@@ -102,16 +102,16 @@ export const PlaceDialog = ({
                     }}
                   ></div>
                   {/* Make it rain */}
-                  {/* TODO: turn this into an SVG for better perf? */}
                   {new Array(100).fill(0).map((_value, i) => {
                     const delay = Math.floor(Math.random() * 500);
                     return (
                       <div
                         key={i}
-                        className={`absolute top-0 -rotate-12 w-1 h-16 bg-gradient-to-b from-transparent to-gray-300 animate-rainfall`}
+                        className={`absolute top-0 w-1 h-16 bg-gradient-to-b from-transparent to-gray-300 animate-rainfall`}
                         style={{
+                          willChange: "transform",
                           top: `${Math.floor(Math.random() * -200)}%`,
-                          left: `${Math.floor(Math.random() * 100 - 15)}%`,
+                          left: `${Math.floor(Math.random() * 100 - 25)}%`,
                           animationDelay: `${Math.floor(
                             Math.random() * 1000
                           )}ms`,
