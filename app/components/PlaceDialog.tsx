@@ -79,94 +79,100 @@ export const PlaceDialog = ({
               leaveFrom="transform scale-100 opacity-100"
               leaveTo="transform scale-90 opacity-0"
             >
-              <div
-                className="relative max-w-screen-sm outline-none"
-                tabIndex={0}
-              >
-                <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                  <img src={placeImageUrl} className="bg-gray-900" />
-                  {/* Apply some spooky filters */}
-                  <div className="absolute inset-0 bg-blue-900 opacity-40 mix-overlay"></div>
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 opacity-60"></div>
-                  <div
-                    className="absolute inset-0 bg-gray-800 bg-opacity-70"
-                    style={{
-                      boxShadow: "inset 0 0 6rem 1rem rgba(0, 0, 0, .5)",
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 mix-blend-overlay"
-                    style={{
-                      backgroundImage:
-                        "radial-gradient(circle at center, white 0, rgba(255,255,255,.5) 30%, rgba(255,255,255,.2) 50%, transparent 70%)",
-                    }}
-                  ></div>
-                  {/* Make it rain */}
-                  {new Array(100).fill(0).map((_value, i) => {
-                    const delay = Math.floor(Math.random() * 500);
-                    return (
+              {isOpen ? (
+                <div
+                  className="relative max-w-screen-sm outline-none"
+                  tabIndex={0}
+                >
+                  <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                    <img src={placeImageUrl} className="bg-gray-900" />
+                    {/* Apply some spooky filters */}
+                    <div className="absolute inset-0 bg-blue-900 opacity-40 mix-overlay"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 opacity-60"></div>
+                    <div
+                      className="absolute inset-0 bg-gray-800 bg-opacity-70"
+                      style={{
+                        boxShadow: "inset 0 0 6rem 1rem rgba(0, 0, 0, .5)",
+                      }}
+                    />
+                    <div
+                      className="absolute inset-0 mix-blend-overlay"
+                      style={{
+                        backgroundImage:
+                          "radial-gradient(circle at center, white 0, rgba(255,255,255,.5) 30%, rgba(255,255,255,.2) 50%, transparent 70%)",
+                      }}
+                    ></div>
+                    {/* Make it rain */}
+                    {new Array(5).fill(0).map((_value, i) => (
                       <div
                         key={i}
-                        className={`absolute top-0 w-1 h-16 bg-gradient-to-b from-transparent to-gray-300 animate-rainfall`}
+                        className="absolute inset-0 animate-rainfall"
                         style={{
                           willChange: "transform",
-                          top: `${Math.floor(Math.random() * -200)}%`,
-                          left: `${Math.floor(Math.random() * 100 - 25)}%`,
-                          animationDelay: `${Math.floor(
-                            Math.random() * 1000
-                          )}ms`,
-                          opacity: Math.random() * 0.5 + 0.1,
+                          animationDelay: `-${Math.floor((1500 / 6) * i)}ms`,
                         }}
-                      />
-                    );
-                  })}
-                </div>
-
-                <div className="absolute -top-4 -left-6 flex items-start">
-                  <Player imageUrl={visitor.imageUrl} />
-                  <div className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg">
-                    {value ? (
-                      <>I think we've trick-or-treated here. 👍</>
-                    ) : (
-                      <>Well, this is spooky. Are you sure about this? 😰</>
-                    )}
+                      >
+                        {new Array(15).fill(0).map((_value, drop) => (
+                          <div
+                            key={drop}
+                            className={`absolute w-1 h-16 -rotate-12 bg-gradient-to-b from-transparent to-gray-300`}
+                            style={{
+                              top: `${Math.floor(Math.random() * 100)}%`,
+                              left: `${Math.floor(Math.random() * 100)}%`,
+                              opacity: Math.random() * 0.5 + 0.1,
+                            }}
+                          ></div>
+                        ))}
+                      </div>
+                    ))}
                   </div>
-                </div>
 
-                <div className="absolute bottom-0 inset-x-0 flex gap-8 p-8 justify-center">
-                  <button
-                    type="button"
-                    className="px-4 py-3 rounded-lg bg-gray-900 bg-opacity-80 text-xl transition hover:bg-opacity-100 hover:scale-105"
-                    onClick={onClose}
-                  >
-                    Let's get out of here
-                  </button>
-                  {!value ? (
+                  <div className="absolute -top-4 -left-6 flex items-start">
+                    <Player imageUrl={visitor.imageUrl} />
+                    <div className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg">
+                      {value ? (
+                        <>I think we've trick-or-treated here. 👍</>
+                      ) : (
+                        <>Well, this is spooky. Are you sure about this? 😰</>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="absolute bottom-0 inset-x-0 flex gap-8 p-8 justify-center">
                     <button
                       type="button"
-                      className="px-4 py-3 rounded-lg bg-yellow-500 text-xl text-black transition hover:bg-yellow-300 hover:scale-105 disabled:saturate-50 disabled:opacity-60 disabled:cursor-default flex items-center gap-2"
-                      onClick={() => {
-                        ringDoorbell({
-                          visitor: {
-                            contractAddress: visitor.tokenAddress,
-                            tokenId: visitor.tokenId,
-                          },
-                          place: {
-                            contractAddress: place.tokenAddress,
-                            tokenId: place.tokenId,
-                          },
-                        })
-                          .then(onVisited)
-                          .finally(onClose);
-                      }}
-                      disabled={loading}
+                      className="px-4 py-3 rounded-lg bg-gray-900 bg-opacity-80 text-xl transition hover:bg-opacity-100 hover:scale-105"
+                      onClick={onClose}
                     >
-                      Ring the doorbell
-                      {loading ? <PendingIcon /> : null}
+                      Let's get out of here
                     </button>
-                  ) : null}
+                    {!value ? (
+                      <button
+                        type="button"
+                        className="px-4 py-3 rounded-lg bg-yellow-500 text-xl text-black transition hover:bg-yellow-300 hover:scale-105 disabled:saturate-50 disabled:opacity-60 disabled:cursor-default flex items-center gap-2"
+                        onClick={() => {
+                          ringDoorbell({
+                            visitor: {
+                              contractAddress: visitor.tokenAddress,
+                              tokenId: visitor.tokenId,
+                            },
+                            place: {
+                              contractAddress: place.tokenAddress,
+                              tokenId: place.tokenId,
+                            },
+                          })
+                            .then(onVisited)
+                            .finally(onClose);
+                        }}
+                        disabled={loading}
+                      >
+                        Ring the doorbell
+                        {loading ? <PendingIcon /> : null}
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </Transition.Child>
           </div>
         </Dialog>
