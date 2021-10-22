@@ -1,24 +1,28 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
+import { TrickOrTreat } from "../typechain";
 
 describe("TrickOrTreat", function () {
   it("should deploy", async function () {
+    this.timeout(1000 * 60);
+
     const [owner, wallet1, wallet2] = await ethers.getSigners();
     const ContractFactory = await ethers.getContractFactory("TrickOrTreat");
-    const contract = await upgrades.deployProxy(ContractFactory);
+    const contract = (await upgrades.deployProxy(
+      ContractFactory
+    )) as TrickOrTreat;
     await contract.deployed();
+    const role = await contract.DOORMAN();
 
-    expect(await contract.owner()).to.equal(owner.address);
+    expect(await contract.hasRole(role, owner.address)).to.equal(false);
+
+    const grantRoleTx = await contract.grantRole(role, owner.address);
+    await grantRoleTx.wait();
+
+    expect(await contract.hasRole(role, owner.address)).to.equal(true);
 
     expect(
-      await contract.tricksBalance({
-        contractAddress: wallet1.address,
-        tokenId: 1,
-      })
-    ).to.equal(0);
-
-    expect(
-      await contract.treatsBalance({
+      await contract.bagContents({
         contractAddress: wallet1.address,
         tokenId: 1,
       })
@@ -32,15 +36,11 @@ describe("TrickOrTreat", function () {
       );
     await tx.wait();
 
-    const tricks = await contract.tricksBalance({
-      contractAddress: wallet1.address,
-      tokenId: 1,
-    });
-    const treats = await contract.treatsBalance({
+    const treats = await contract.bagContents({
       contractAddress: wallet1.address,
       tokenId: 1,
     });
 
-    expect(tricks.toNumber() + treats.toNumber()).to.be.greaterThan(0);
+    expect(treats).to.be.greaterThan(0);
   });
 });

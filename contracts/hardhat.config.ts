@@ -2,18 +2,43 @@ import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
+import "hardhat-gas-reporter";
 import { task } from "hardhat/config";
-import { ethers } from "ethers";
 
 require("dotenv").config();
 
-task("createWallet", "Creates a new wallet").setAction(async () => {
+task("createWallets", "Creates 5 new wallets").setAction(async () => {
   console.log("");
-  new Array(5).fill(0).map(() => {
+  new Array(5).fill(0).forEach(() => {
+    // @ts-ignore
     const wallet = ethers.Wallet.createRandom();
     console.log("Wallet:\t", wallet.address);
     console.log("Private key:\t", wallet.privateKey.replace(/^0x/, ""));
     console.log("");
+  });
+  console.log("");
+});
+
+task("balances", "Show balances of accounts").setAction(async () => {
+  // @ts-ignore
+  const accounts = await ethers.getSigners();
+  console.log("");
+  const results = await Promise.all(
+    // @ts-ignore
+    accounts.map(async (account) => {
+      // @ts-ignore
+      const balance = await ethers.provider.getBalance(account.address);
+      return [account, balance];
+    })
+  );
+  // @ts-ignore
+  results.forEach(([account, balance]) => {
+    console.log(
+      account.address,
+      "has balance",
+      // @ts-ignore
+      ethers.utils.formatEther(balance, 18)
+    );
   });
   console.log("");
 });

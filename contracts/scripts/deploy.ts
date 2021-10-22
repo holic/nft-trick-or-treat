@@ -3,8 +3,6 @@ import { TrickOrTreat, TrickOrTreat__factory } from "../typechain";
 import { ethers, upgrades, network } from "hardhat";
 import web3 from "web3";
 
-const DOORMAN_ROLE = web3.utils.keccak256("DOORMAN");
-
 const exists = (path: string) =>
   fs
     .access(path)
@@ -56,13 +54,15 @@ async function start() {
     );
   }
 
+  const role = await contract.DOORMAN();
+
   const [owner, ...remaining] = await ethers.getSigners();
   const doormen = remaining.map((signer) => signer.address);
   console.log("adding doormen wallets", doormen);
   const nonce = await owner.getTransactionCount();
   await Promise.all(
     doormen.map(async (doorman, i) => {
-      const tx = await contract.grantRole(DOORMAN_ROLE, doorman, {
+      const tx = await contract.grantRole(role, doorman, {
         nonce: nonce + i,
       });
       await tx.wait();

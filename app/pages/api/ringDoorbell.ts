@@ -70,7 +70,7 @@ export default async function handler(
   try {
     const tx = await trickOrTreatContract
       .connect(wallet)
-      .ringDoorbell(data.visitor, data.place);
+      .ringDoorbell(data.visitor, data.place, { gasLimit: 150_000 });
     await tx.wait();
 
     res.status(200).json({ success: true });
