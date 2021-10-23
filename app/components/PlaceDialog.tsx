@@ -1,16 +1,16 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Head from "next/head";
 import { Dialog, Transition } from "@headlessui/react";
 import { Player } from "@app/components/Player";
 import { OpenSeaAsset } from "@app/utils/types";
 import { useProvider } from "ethereal-react";
-import { useToast } from "@app/utils/useToast";
 import * as signedMessageData from "@app/utils/signedMessageData";
 import { RingDoorbellMessage } from "@app/utils/signedMessageData";
 import { useAsyncFn } from "react-use";
 import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { ethers } from "ethers";
 import { TrickOrTreat__factory } from "contracts/typechain";
+import { motion, AnimatePresence } from "framer-motion";
 
 const polygonProvider = new ethers.providers.JsonRpcProvider(
   process.env.NEXT_PUBLIC_POLYGON_RPC_ENDPOINT
@@ -25,9 +25,8 @@ type Props = {
   onVisited: () => void;
 };
 
-const useRingDoorbell = () => {
+const useRingDoorbell = (setMessage: (message: string) => void) => {
   const provider = useProvider();
-  const { addToast } = useToast();
 
   const ringDoorbell = async (data: RingDoorbellMessage) => {
     const message = signedMessageData.stringify(
@@ -35,6 +34,8 @@ const useRingDoorbell = () => {
       { ts: Date.now(), data }
     );
     const signature = await provider.getSigner().signMessage(message);
+    setMessage("Okay, walking up now… 🤫");
+
     const result = await fetch("/api/ringDoorbell", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,11 +46,13 @@ const useRingDoorbell = () => {
     }).then((res) => res.json());
 
     if (result.error) {
-      addToast(`🎃 ${result.message}`);
+      setMessage(result.message);
     }
 
     if (result.transaction) {
-      addToast("I rang the doorbell. Are you ready to shout 'trick-or-treat'?");
+      setMessage(
+        "I rang the doorbell. Are you ready to shout 'trick-or-treat'? 🎃"
+      );
 
       console.log("got transaction hash", result.transaction);
       const tx = await polygonProvider.waitForTransaction(result.transaction);
@@ -59,12 +62,12 @@ const useRingDoorbell = () => {
       tx.logs.forEach((log) => {
         const parsedLog = contract.interface.parseLog(log);
         if (parsedLog.name === "Treated") {
-          addToast(
-            `🍬 Yay, they gave us ${parsedLog.args.amount} treats. Thanks!`
+          setMessage(
+            `Yay, they gave us ${parsedLog.args.amount} treats. 🍬 Thanks!`
           );
         } else if (parsedLog.name === "Tricked") {
-          addToast(
-            `👺 Oh no, they tricked us! They took ${parsedLog.args.amount} of my treats. Let's get out of here!`
+          setMessage(
+            `Oh no, they tricked us! 👺 They took ${parsedLog.args.amount} of my treats. Let's get out of here!`
           );
         }
       });
@@ -83,12 +86,32 @@ export const PlaceDialog = ({
   onVisited,
 }: Props) => {
   const placeImageUrl = place.imageUrl.replace(/=s\d+$/, "=s800");
-  const [{ loading, error }, ringDoorbell] = useRingDoorbell();
+  // const [messages, setMessages] = useState([
+  //   {
+  //     message: hasVisited
+  //       ? "I think we've trick-or-treated here today. 👍"
+  //       : "Well, this is spooky. Are you sure about this? 😰",
+  //     isRemoved: false,
+  //   },
+  // ]);
+  // const setMessage = (message: string) => {
+  //   setMessages([
+  //     ...messages.map((m) => ({ ...m, isRemoved: true })),
+  //     { message, isRemoved: false },
+  //   ]);
+  // };
+  const [message, setMessage] = useState(
+    hasVisited
+      ? "I think we've trick-or-treated here today. 👍"
+      : "Well, this is spooky. Are you sure about this? 😰"
+  );
+
+  const [{ loading, error }, ringDoorbell] = useRingDoorbell(setMessage);
 
   // TODO: move this to `useRingDoorbell`?
   useEffect(() => {
     if (error) {
-      console.log("Error while ringing doorbell");
+      console.log("Error while ringing doorbell", error);
     }
   }, [error]);
 
@@ -163,12 +186,40 @@ export const PlaceDialog = ({
 
                   <div className="absolute -top-4 -left-6 flex items-start">
                     <Player imageUrl={visitor.imageUrl} />
-                    <div className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg">
-                      {hasVisited ? (
-                        <>I think we've trick-or-treated here today. 👍</>
-                      ) : (
-                        <>Well, this is spooky. Are you sure about this? 😰</>
-                      )}
+                    {/* <div className="flex flex-col">
+                      {messages.map((message) => (
+                        <div
+                          key={message}
+                          className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg"
+                        >
+                          {message}
+                        </div>
+                      ))}
+                    </div> */}
+
+                    {/* 
+                    // TODO: make our own AnimatePresence thing?
+                    enterFrom="translate-y-4 opacity-0"
+                    enterTo="translate-y-0 opacity-100"
+                    leave="transition duration-1000"
+                    leaveFrom="translate-y-0 opacity-100"
+                    leaveTo="-translate-y-4 opacity-0"
+                    className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg"
+                    */}
+
+                    <div className="relative w-96">
+                      <AnimatePresence>
+                        <motion.div
+                          key={message}
+                          initial={{ opacity: 0, y: 60 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -60 }}
+                          transition={{ type: "tween" }}
+                          className="absolute bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg"
+                        >
+                          {message}
+                        </motion.div>
+                      </AnimatePresence>
                     </div>
                   </div>
 
@@ -194,9 +245,8 @@ export const PlaceDialog = ({
                               contractAddress: place.tokenAddress,
                               tokenId: place.tokenId,
                             },
-                          })
-                            .then(onVisited)
-                            .finally(onClose);
+                          }).then(onVisited);
+                          // .finally(onClose);
                         }}
                         disabled={loading}
                       >
