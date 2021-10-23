@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as signedMessageData from "@app/utils/signedMessageData";
 import { ethers } from "ethers";
-import { isOwner } from "@app/utils/nftContracts";
 import { trickOrTreatContract } from "@app/utils/contracts";
 import { NonceManager } from "@ethersproject/experimental";
 import { createHash } from "crypto";
+import { parseTransactionError } from "@app/utils/parseTransactionError";
+import { isOwner } from "@app/utils/nftContracts";
 
 if (!process.env.DOORMAN_PRIVATE_KEYS) {
   throw new Error("Missing environment variable: DOORMAN_PRIVATE_KEYS");
@@ -46,46 +47,42 @@ export default async function handler(
   const { message, signature } = req.body;
   const { address, data } = signedMessageData.parse(message, signature);
 
-  // Skip owner check for now to improve speed
-  // console.time("check owner");
-  // if (
-  //   !(await isOwner(
-  //     data.visitor.contractAddress,
-  //     address,
-  //     data.visitor.tokenId
-  //   ))
-  // ) {
-  //   // TODO: make a generic error handler so we can throw or wrap our errors
-  //   res.status(400).json({
-  //     error: "NOT_OWNER",
-  //     message: "You do not own this NFT. Try one of your own?",
-  //   });
-  // }
-  // console.timeEnd("check owner");
+  // TODO: we can probably just do this once per NFT and cache the result for the ~day
+  if (
+    !(await isOwner(
+      data.visitor.contractAddress,
+      address,
+      data.visitor.tokenId
+    ))
+  ) {
+    // TODO: make a generic error handler so we can throw or wrap our errors
+    res.status(400).json({
+      error: "NOT_OWNER",
+      message: "You do not own this NFT. Try one of your own?",
+    });
+  }
 
   // Pick a wallet based on the hash of visitor/place, so retries flow through the same nonce manager
   const visitorPlaceHash = hash(JSON.stringify([data.visitor, data.place]));
   const wallet = wallets[visitorPlaceHash.readUInt32LE() % wallets.length];
 
   try {
+    // TODO: can probably move this to the frontend, before signing
+    await trickOrTreatContract.canRingDoorbell(data.visitor, data.place);
+
     const tx = await trickOrTreatContract
       .connect(wallet)
       .ringDoorbell(data.visitor, data.place, { gasLimit: 150_000 });
-    await tx.wait();
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ transaction: tx.hash });
   } catch (error) {
     if (!(error instanceof Error)) {
       throw error;
     }
 
-    for (const [errorCode, message] of Object.entries(errorMessages)) {
-      if (error.message.includes(`PUMPKIN__${errorCode}`)) {
-        return res.status(400).json({
-          error: errorCode,
-          message,
-        });
-      }
+    const response = parseTransactionError(error);
+    if (response) {
+      return res.status(400).json(response);
     }
 
     console.log("unknown error while creating tx", typeof error);

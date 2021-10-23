@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import Head from "next/head";
 import { Dialog, Transition } from "@headlessui/react";
 import { Player } from "@app/components/Player";
@@ -9,12 +9,19 @@ import * as signedMessageData from "@app/utils/signedMessageData";
 import { RingDoorbellMessage } from "@app/utils/signedMessageData";
 import { useAsyncFn } from "react-use";
 import { PendingIcon } from "@app/components/icons/PendingIcon";
+import { ethers } from "ethers";
+import { TrickOrTreat__factory } from "contracts/typechain";
+
+const polygonProvider = new ethers.providers.JsonRpcProvider(
+  process.env.NEXT_PUBLIC_POLYGON_RPC_ENDPOINT
+);
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   visitor: OpenSeaAsset;
   place: OpenSeaAsset;
+  hasVisited: boolean;
   onVisited: () => void;
 };
 
@@ -41,8 +48,27 @@ const useRingDoorbell = () => {
       addToast(`🎃 ${result.message}`);
     }
 
-    // For successes, we'll let the event listener generate a toast
-    return true;
+    if (result.transaction) {
+      addToast("I rang the doorbell. Are you ready to shout 'trick-or-treat'?");
+
+      console.log("got transaction hash", result.transaction);
+      const tx = await polygonProvider.waitForTransaction(result.transaction);
+      console.log("transaction complete", tx);
+
+      const contract = TrickOrTreat__factory.connect(tx.to, polygonProvider);
+      tx.logs.forEach((log) => {
+        const parsedLog = contract.interface.parseLog(log);
+        if (parsedLog.name === "Treated") {
+          addToast(
+            `🍬 Yay, they gave us ${parsedLog.args.amount} treats. Thanks!`
+          );
+        } else if (parsedLog.name === "Tricked") {
+          addToast(
+            `👺 Oh no, they tricked us! They took ${parsedLog.args.amount} of my treats. Let's get out of here!`
+          );
+        }
+      });
+    }
   };
 
   return useAsyncFn(ringDoorbell, [provider]);
@@ -53,10 +79,18 @@ export const PlaceDialog = ({
   onClose,
   visitor,
   place,
+  hasVisited,
   onVisited,
 }: Props) => {
   const placeImageUrl = place.imageUrl.replace(/=s\d+$/, "=s800");
-  const [{ loading, error, value }, ringDoorbell] = useRingDoorbell();
+  const [{ loading, error }, ringDoorbell] = useRingDoorbell();
+
+  // TODO: move this to `useRingDoorbell`?
+  useEffect(() => {
+    if (error) {
+      console.log("Error while ringing doorbell");
+    }
+  }, [error]);
 
   return (
     <>
@@ -130,8 +164,8 @@ export const PlaceDialog = ({
                   <div className="absolute -top-4 -left-6 flex items-start">
                     <Player imageUrl={visitor.imageUrl} />
                     <div className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg">
-                      {value ? (
-                        <>I think we've trick-or-treated here. 👍</>
+                      {hasVisited ? (
+                        <>I think we've trick-or-treated here today. 👍</>
                       ) : (
                         <>Well, this is spooky. Are you sure about this? 😰</>
                       )}
@@ -146,7 +180,7 @@ export const PlaceDialog = ({
                     >
                       Let's get out of here
                     </button>
-                    {!value ? (
+                    {!hasVisited ? (
                       <button
                         type="button"
                         className="px-4 py-3 rounded-lg bg-yellow-500 text-xl text-black transition hover:bg-yellow-300 hover:scale-105 disabled:saturate-50 disabled:opacity-60 disabled:cursor-default flex items-center gap-2"

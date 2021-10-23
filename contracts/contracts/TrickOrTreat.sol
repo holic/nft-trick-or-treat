@@ -42,12 +42,20 @@ contract TrickOrTreat is AccessControlUpgradeable {
         return uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId)));
     }
 
+    function getVisitorTodayHash(NFT memory visitor) internal view returns (uint256) {
+        return uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, block.timestamp / 1 days)));
+    }
+
+    function getPlaceVisitHash(NFT memory visitor, NFT memory place) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, place.contractAddress, place.tokenId)));
+    }
+
     function bagContents(NFT memory visitor) public view returns (uint16) {
         uint256 visitorHash = getVisitorHash(visitor);
         return treats[visitorHash];
     }
 
-    function ringDoorbell(NFT memory visitor, NFT memory place) public onlyRole(DOORMAN) {
+    function canRingDoorbell(NFT memory visitor, NFT memory place) public view {
         // Our backend will determine if the visitor and place are valid addresses pointing to
         // allowed NFTs on Ethereum mainnet and that the wallet owns the visitor.
 
@@ -55,20 +63,32 @@ contract TrickOrTreat is AccessControlUpgradeable {
         uint256 visitorHash = getVisitorHash(visitor);
         require(treats[visitorHash] < 500, "PUMPKIN__BAG_FULL");
 
-        uint256 visitorTodayHash = uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, block.timestamp / 1 days)));
+        uint256 visitorTodayHash = getVisitorTodayHash(visitor);
         require(dailyVisits[visitorTodayHash] < 12, "PUMPKIN__TOO_TIRED");
 
         // Check if visitor has already been to place today
-        uint256 placeVisitHash = uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, place.contractAddress, place.tokenId)));
+        uint256 placeVisitHash = getPlaceVisitHash(visitor, place);
         require(block.timestamp - placeVisits[placeVisitHash] > 16 hours, "PUMPKIN__ALREADY_VISITED_TODAY");
+
+        // Check if anyone is home today
+        // 
+        // I _really_ wanted this check to consume a daily visit but I'm having to restructure
+        // this contract a bit to make it easier to retrieve these revert codes when passing
+        // around a transaction hash. Maybe I'll do something more complicated in the future,
+        // but this does the trick for now for this silly game.
+        uint256 isAnyoneHomeToday = uint256(keccak256(abi.encode(place.contractAddress, place.tokenId, block.timestamp / 1 days)));
+        require(isAnyoneHomeToday % 8 != 0, "PUMPKIN__NO_ANSWER");
+    }
+
+    function ringDoorbell(NFT memory visitor, NFT memory place) public onlyRole(DOORMAN) {
+        canRingDoorbell(visitor, place);
+
+        uint256 visitorHash = getVisitorHash(visitor);
+        uint256 visitorTodayHash = getVisitorTodayHash(visitor);
+        uint256 placeVisitHash = getPlaceVisitHash(visitor, place);
 
         dailyVisits[visitorTodayHash] += 1;
         placeVisits[placeVisitHash] = block.timestamp;
-
-        // Check if anyone is home today
-        uint256 isAnyoneHomeToday = uint256(keccak256(abi.encode(place.contractAddress, place.tokenId, block.timestamp / 1 days)));
-        require(isAnyoneHomeToday % 8 != 0, "PUMPKIN__NO_ANSWER");
-
 
         uint16 amount = uint16(Random.random() % 5 + 1);
 

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useAsync, useAsyncFn } from "react-use";
+import { AsyncState } from "react-use/lib/useAsyncFn";
 import { Layout } from "@app/components/Layout";
 import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { Suspense } from "@app/components/Suspense";
@@ -9,9 +10,7 @@ import { Container } from "@app/components/Container";
 import { opensea } from "@app/utils/opensea";
 import shuffle from "lodash/shuffle";
 import { ethers } from "ethers";
-import { TypedListener } from "contracts/typechain/common";
 import { Place } from "@app/components/Place";
-import { useToast } from "@app/utils/useToast";
 import { trickOrTreatContract } from "@app/utils/contracts";
 import { Player } from "@app/components/Player";
 
@@ -39,9 +38,29 @@ const useVisitor = () => {
     : null;
 };
 
-const Places = () => {
+const useTreats = () => {
   const visitor = useVisitor();
-  const { addToast } = useToast();
+
+  const [treats, refreshTreats] = useAsyncFn(async () => {
+    if (!visitor) return;
+    return trickOrTreatContract.bagContents({
+      contractAddress: visitor.tokenAddress,
+      tokenId: visitor.tokenId,
+    });
+  }, [visitor?.tokenAddress, visitor?.tokenId]);
+
+  useEffect(() => {
+    refreshTreats();
+  }, [refreshTreats]);
+
+  return {
+    treats,
+    refreshTreats: () => refreshTreats(),
+  };
+};
+
+const Places = ({ onVisited }: { onVisited: () => void }) => {
+  const visitor = useVisitor();
 
   const assets = useAsync(async () => {
     const { assets } = await opensea.api.getAssets({
@@ -51,44 +70,6 @@ const Places = () => {
     });
     return shuffle(assets).slice(0, 12);
   }, []);
-
-  useEffect(() => {
-    if (!visitor) return;
-
-    const treatedFilter = trickOrTreatContract.filters.Treated(
-      visitor.tokenAddress,
-      ethers.BigNumber.from(visitor.tokenId)
-    );
-    // TODO: figure out how to make a better type signature here
-    const treatedListener: TypedListener<
-      [string, ethers.BigNumber, number],
-      {}
-    > = (address, tokenId, amount) => {
-      addToast(`🍬 Yay, they gave us ${amount} treats. Thanks!`);
-    };
-
-    const trickedFilter = trickOrTreatContract.filters.Tricked(
-      visitor.tokenAddress,
-      ethers.BigNumber.from(visitor.tokenId)
-    );
-    // TODO: figure out how to make a better type signature here
-    const trickedListener: TypedListener<
-      [string, ethers.BigNumber, number],
-      {}
-    > = (address, tokenId, amount) => {
-      addToast(
-        `👺 Oh no, they tricked us! They took ${amount} of my treats. Let's get out of here!`
-      );
-    };
-
-    trickOrTreatContract.on(treatedFilter, treatedListener);
-    trickOrTreatContract.on(trickedFilter, trickedListener);
-
-    return () => {
-      trickOrTreatContract.off(treatedFilter, treatedListener);
-      trickOrTreatContract.off(trickedFilter, trickedListener);
-    };
-  }, [visitor?.tokenAddress, visitor?.tokenId]);
 
   if (!visitor || assets.loading) {
     return (
@@ -110,6 +91,7 @@ const Places = () => {
               tokenId: asset.tokenId || "",
             }}
             name={asset.description.replace(/^.*Lot \d+ - /, "")}
+            onVisited={onVisited}
           />
         ))}
       </div>
@@ -117,23 +99,17 @@ const Places = () => {
   );
 };
 
-const PlayerStatus = () => {
+const PlayerStatus = ({
+  treats,
+  refreshTreats,
+}: {
+  treats: AsyncState<number>;
+  refreshTreats: () => void;
+}) => {
   const visitor = useVisitor();
-
-  const [bagContents, fetchBagContents] = useAsyncFn(async () => {
-    if (!visitor) return;
-    return trickOrTreatContract.bagContents({
-      contractAddress: visitor.tokenAddress,
-      tokenId: visitor.tokenId,
-    });
-  }, [visitor?.tokenAddress, visitor?.tokenId]);
-
-  const treats = bagContents?.value || 0;
 
   useEffect(() => {
     if (!visitor) return;
-
-    fetchBagContents();
 
     const treatedFilter = trickOrTreatContract.filters.Treated(
       visitor.tokenAddress,
@@ -144,14 +120,14 @@ const PlayerStatus = () => {
       ethers.BigNumber.from(visitor.tokenId)
     );
 
-    trickOrTreatContract.on(treatedFilter, fetchBagContents);
-    trickOrTreatContract.on(trickedFilter, fetchBagContents);
+    trickOrTreatContract.on(treatedFilter, refreshTreats);
+    trickOrTreatContract.on(trickedFilter, refreshTreats);
 
     return () => {
-      trickOrTreatContract.off(treatedFilter, fetchBagContents);
-      trickOrTreatContract.off(trickedFilter, fetchBagContents);
+      trickOrTreatContract.off(treatedFilter, refreshTreats);
+      trickOrTreatContract.off(trickedFilter, refreshTreats);
     };
-  }, [visitor?.tokenAddress, visitor?.tokenId]);
+  }, [visitor?.tokenAddress, visitor?.tokenId, refreshTreats]);
 
   const { value: nft } = useAsync(async () => {
     if (!visitor) return;
@@ -165,30 +141,35 @@ const PlayerStatus = () => {
   return (
     <>
       <Player imageUrl={nft?.imageUrl} />
-      <span className="text-xl">🍬 {treats} treats</span>
+      {treats.value != null ? (
+        <span className="text-xl">🍬 {treats.value} treats</span>
+      ) : null}
     </>
   );
 };
 
-const NFTPage: NextPage = () => (
-  <Layout>
-    <Container>
-      <div className="flex pt-16 pb-64 gap-8">
-        <div className="flex flex-shrink-0 items-center flex-col flex-wrap">
-          <Suspense fallback={<PendingIcon />}>
-            <PlayerStatus />
-          </Suspense>
-        </div>
+const NFTPage: NextPage = () => {
+  const { treats, refreshTreats } = useTreats();
+  return (
+    <Layout>
+      <Container>
+        <div className="flex pt-16 pb-64 gap-8">
+          <div className="flex flex-shrink-0 items-center flex-col flex-wrap">
+            <Suspense fallback={<PendingIcon />}>
+              <PlayerStatus treats={treats} refreshTreats={refreshTreats} />
+            </Suspense>
+          </div>
 
-        <div className="flex flex-col gap-4">
-          <p className="text-2xl text-yellow-400">
-            Whose doorbell should we ring?
-          </p>
-          <Places />
+          <div className="flex flex-col gap-4">
+            <p className="text-2xl text-yellow-400">
+              Whose doorbell should we ring?
+            </p>
+            <Places onVisited={() => refreshTreats()} />
+          </div>
         </div>
-      </div>
-    </Container>
-  </Layout>
-);
+      </Container>
+    </Layout>
+  );
+};
 
 export default NFTPage;

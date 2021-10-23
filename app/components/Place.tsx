@@ -1,22 +1,17 @@
 import { useState } from "react";
 import { OpenSeaAsset } from "@app/utils/types";
-import { useProvider } from "ethereal-react";
-import * as signedMessageData from "@app/utils/signedMessageData";
-import { RingDoorbellMessage } from "@app/utils/signedMessageData";
-import { useAsyncFn } from "react-use";
-import { PendingIcon } from "@app/components/icons/PendingIcon";
 import { CheckIcon } from "@app/components/icons/CheckIcon";
 import classNames from "classnames";
-import { useToast } from "@app/utils/useToast";
 import { PlaceDialog } from "@app/components/PlaceDialog";
 
 type Props = {
   visitor: OpenSeaAsset;
   place: OpenSeaAsset;
   name: string;
+  onVisited: () => void;
 };
 
-export const Place = ({ visitor, place, name }: Props) => {
+export const Place = ({ visitor, place, name, onVisited }: Props) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [hasVisited, setVisited] = useState(false);
 
@@ -59,7 +54,11 @@ export const Place = ({ visitor, place, name }: Props) => {
         onClose={() => setDialogOpen(false)}
         visitor={visitor}
         place={place}
-        onVisited={() => setVisited(true)}
+        hasVisited={hasVisited}
+        onVisited={() => {
+          setVisited(true);
+          onVisited();
+        }}
       />
     </>
   );
