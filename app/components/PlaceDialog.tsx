@@ -58,6 +58,9 @@ const useRingDoorbell = (setMessage: (message: string) => void) => {
       const tx = await polygonProvider.waitForTransaction(result.transaction);
       console.log("transaction complete", tx);
 
+      setMessage("Trick or treat! 👻");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const contract = TrickOrTreat__factory.connect(tx.to, polygonProvider);
       tx.logs.forEach((log) => {
         const parsedLog = contract.interface.parseLog(log);
@@ -86,20 +89,7 @@ export const PlaceDialog = ({
   onVisited,
 }: Props) => {
   const placeImageUrl = place.imageUrl.replace(/=s\d+$/, "=s800");
-  // const [messages, setMessages] = useState([
-  //   {
-  //     message: hasVisited
-  //       ? "I think we've trick-or-treated here today. 👍"
-  //       : "Well, this is spooky. Are you sure about this? 😰",
-  //     isRemoved: false,
-  //   },
-  // ]);
-  // const setMessage = (message: string) => {
-  //   setMessages([
-  //     ...messages.map((m) => ({ ...m, isRemoved: true })),
-  //     { message, isRemoved: false },
-  //   ]);
-  // };
+
   const [message, setMessage] = useState(
     hasVisited
       ? "I think we've trick-or-treated here today. 👍"
@@ -186,16 +176,6 @@ export const PlaceDialog = ({
 
                   <div className="absolute -top-4 -left-6 flex items-start">
                     <Player imageUrl={visitor.imageUrl} />
-                    {/* <div className="flex flex-col">
-                      {messages.map((message) => (
-                        <div
-                          key={message}
-                          className="bg-white text-black p-3 rounded rounded-bl-none mt-1 ml-2 text-lg"
-                        >
-                          {message}
-                        </div>
-                      ))}
-                    </div> */}
 
                     {/* 
                     // TODO: make our own AnimatePresence thing?
