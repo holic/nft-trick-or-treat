@@ -47,6 +47,7 @@ const useRingDoorbell = (setMessage: (message: string) => void) => {
 
     if (result.error) {
       setMessage(result.message);
+      return;
     }
 
     if (result.transaction) {
@@ -62,18 +63,29 @@ const useRingDoorbell = (setMessage: (message: string) => void) => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const contract = TrickOrTreat__factory.connect(tx.to, polygonProvider);
-      tx.logs.forEach((log) => {
-        const parsedLog = contract.interface.parseLog(log);
-        if (parsedLog.name === "Treated") {
-          setMessage(
-            `Yay, they gave us ${parsedLog.args.amount} treats. 🍬 Thanks!`
-          );
-        } else if (parsedLog.name === "Tricked") {
-          setMessage(
-            `Oh no, they tricked us! 👺 They took ${parsedLog.args.amount} of my treats. Let's get out of here!`
-          );
+      for (const log of tx.logs) {
+        try {
+          const parsedLog = contract.interface.parseLog(log);
+          if (parsedLog.name === "Treated") {
+            setMessage(
+              `Yay, they gave us ${parsedLog.args.amount} treats. 🍬 Thanks!`
+            );
+            return;
+          }
+          if (parsedLog.name === "Tricked") {
+            setMessage(
+              `Oh no, they tricked us! 👺 They took ${parsedLog.args.amount} of my treats. Let's get out of here!`
+            );
+            return;
+          }
+        } catch (error) {
+          // do nothing
+          console.log(error);
         }
-      });
+      }
+
+      console.log("No known evnets found in logs");
+      return;
     }
   };
 

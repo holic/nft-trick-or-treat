@@ -68,14 +68,14 @@ async function start() {
   const role = await contract.DOORMAN();
   await Promise.all(
     doormen.map(async (doorman) => {
-      // const hasRole = await contract.hasRole(role, doorman);
-      // if (!hasRole) {
-      const tx = await contract.grantRole(role, doorman, {
-        nonce: ++nonce,
-      });
-      console.log("adding doorman wallet", doorman, tx.hash);
-      await tx.wait();
-      // }
+      const hasRole = await contract.hasRole(role, doorman);
+      if (!hasRole) {
+        const tx = await contract.grantRole(role, doorman, {
+          nonce: ++nonce,
+        });
+        console.log("adding doorman wallet", doorman, tx.hash);
+        await tx.wait();
+      }
     })
   );
 

@@ -50,6 +50,7 @@ contract TrickOrTreat is AccessControlUpgradeable {
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DOORMAN, msg.sender);
     }
 
     function getVisitorHash(NFT memory visitor) public pure returns (uint256) {
@@ -124,13 +125,13 @@ contract TrickOrTreat is AccessControlUpgradeable {
         return visitors.contains(visitorHash);
     }
 
-    function addVisitor(NFT memory visitor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addVisitor(NFT memory visitor) public onlyRole(DOORMAN) {
         uint256 visitorHash = getVisitorHash(visitor);
         visitors.add(visitorHash);
         visitorHashes[visitorHash] = visitor;
     }
 
-    function addVisitors(NFT[] memory _visitors) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addVisitors(NFT[] memory _visitors) public onlyRole(DOORMAN) {
         for (uint i = 0; i < _visitors.length; i++) {
             addVisitor(_visitors[i]);
         }
