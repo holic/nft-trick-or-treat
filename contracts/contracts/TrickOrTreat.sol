@@ -2,12 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./util/Random.sol";
 
 import "hardhat/console.sol";
 
 contract TrickOrTreat is AccessControlUpgradeable {
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
+
     bytes32 public constant DOORMAN = keccak256("DOORMAN");
 
     // I started with ERC-1155, but realized I wanted to store balances in relation to
@@ -23,12 +26,23 @@ contract TrickOrTreat is AccessControlUpgradeable {
         uint256 tokenId;
     }
 
+    struct NFTTreats {
+        address contractAddress;
+        uint256 tokenId;
+        uint16 treats;
+    }
+
     // place+visitor hash => timestamp
     mapping (uint256 => uint256) public placeVisits;
     // visitor+day hash => number of visits
     mapping (uint256 => uint8) public dailyVisits;
     // visitor hash => number of treats
     mapping (uint256 => uint16) public treats;
+
+    // visitor hashes, so we can iterate and retrieve treats count
+    EnumerableSetUpgradeable.UintSet internal visitors;
+    // visitor hash to NFT
+    mapping (uint256 => NFT) public visitorHashes;
 
     event Tricked(address indexed visitorContractAddress, uint256 indexed visitorTokenId, uint16 amount);
     event Treated(address indexed visitorContractAddress, uint256 indexed visitorTokenId, uint16 amount);
@@ -38,15 +52,15 @@ contract TrickOrTreat is AccessControlUpgradeable {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function getVisitorHash(NFT memory visitor) internal pure returns (uint256) {
+    function getVisitorHash(NFT memory visitor) public pure returns (uint256) {
         return uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId)));
     }
 
-    function getVisitorTodayHash(NFT memory visitor) internal view returns (uint256) {
+    function getVisitorTodayHash(NFT memory visitor) public view returns (uint256) {
         return uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, block.timestamp / 1 days)));
     }
 
-    function getPlaceVisitHash(NFT memory visitor, NFT memory place) internal pure returns (uint256) {
+    function getPlaceVisitHash(NFT memory visitor, NFT memory place) public pure returns (uint256) {
         return uint256(keccak256(abi.encode(visitor.contractAddress, visitor.tokenId, place.contractAddress, place.tokenId)));
     }
 
@@ -95,11 +109,28 @@ contract TrickOrTreat is AccessControlUpgradeable {
         if (Random.random() % 6 == 0 && treats[visitorHash] > 0) {
             amount = amount > treats[visitorHash] ? treats[visitorHash] : amount;
             treats[visitorHash] = treats[visitorHash] - amount;
+            addVisitor(visitor);
             emit Tricked(visitor.contractAddress, visitor.tokenId, amount);
         }
         else {
             treats[visitorHash] = treats[visitorHash] + amount;
+            addVisitor(visitor);
             emit Treated(visitor.contractAddress, visitor.tokenId, amount);
         }
+    }
+
+    function hasVisitedBefore(NFT memory visitor) public view returns (bool) {
+        uint256 visitorHash = getVisitorHash(visitor);
+        return visitors.contains(visitorHash);
+    }
+
+    function addVisitor(NFT memory visitor) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        uint256 visitorHash = getVisitorHash(visitor);
+        visitors.add(visitorHash);
+        visitorHashes[visitorHash] = visitor;
+    }
+
+    function listVisitors() public view returns (uint256[] memory) {
+        return visitors.values();
     }
 }

@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { TrickOrTreat, TrickOrTreat__factory } from "../typechain";
 import { ethers, upgrades, network } from "hardhat";
 import web3 from "web3";
+import uniqBy from "lodash/uniqBy";
 
 const exists = (path: string) =>
   fs
@@ -54,20 +55,51 @@ async function start() {
     );
   }
 
-  const role = await contract.DOORMAN();
-
   const [owner, ...remaining] = await ethers.getSigners();
+  let nonce = await owner.getTransactionCount();
+
   const doormen = remaining.map((signer) => signer.address);
+  const role = await contract.DOORMAN();
   console.log("adding doormen wallets", doormen);
-  const nonce = await owner.getTransactionCount();
   await Promise.all(
-    doormen.map(async (doorman, i) => {
+    doormen.map(async (doorman) => {
       const tx = await contract.grantRole(role, doorman, {
-        nonce: nonce + i,
+        nonce: ++nonce,
       });
       await tx.wait();
     })
   );
+
+  console.log("backfilling visitors");
+  console.log("currently at ", (await contract.listVisitors()).length);
+
+  const treatedFilter = contract.filters.Treated();
+  const treatedEvents = await contract.queryFilter(treatedFilter, 20422645);
+  const visitors = uniqBy(
+    treatedEvents.map((event) => ({
+      contractAddress: event.args.visitorContractAddress,
+      tokenId: event.args.visitorTokenId,
+    })),
+    ({ contractAddress, tokenId }) => `${contractAddress}:${tokenId}`
+  );
+
+  await Promise.all(
+    visitors.map(async (visitor) => {
+      const hasVisited = await contract.hasVisitedBefore(visitor);
+      console.log("has visited?", hasVisited, visitor);
+      if (!hasVisited) {
+        console.log("adding visitor", visitor);
+        const addTx = await contract.addVisitor(visitor, { nonce: ++nonce });
+        await addTx.wait();
+        console.log(
+          "now has visited?",
+          await contract.hasVisitedBefore(visitor),
+          visitor
+        );
+      }
+    })
+  );
+  console.log("now at ", (await contract.listVisitors()).length);
 
   console.log("Done!");
 }

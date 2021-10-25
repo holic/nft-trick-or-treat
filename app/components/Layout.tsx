@@ -8,9 +8,11 @@ import { Container } from "@app/components/Container";
 import { ToastProvider } from "@app/utils/useToast";
 import { Toasts } from "@app/components/Toasts";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import { PendingIcon } from "@app/components/icons/PendingIcon";
 
 type Props = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  loading?: boolean;
 };
 
 const ConnectWallet = () => {
@@ -35,7 +37,7 @@ const ConnectWallet = () => {
   );
 };
 
-export const Layout = ({ children }: Props) => (
+export const Layout = ({ children, loading }: Props) => (
   <>
     <Head>
       <title>NFT Trick-or-Treat</title>
@@ -77,7 +79,15 @@ export const Layout = ({ children }: Props) => (
         <TopBar>
           <Wallet />
         </TopBar>
-        {children}
+        {loading ? (
+          <Container>
+            <div className="py-20 flex items-center justify-center text-3xl">
+              <PendingIcon />
+            </div>
+          </Container>
+        ) : (
+          children
+        )}
         <Container>
           <div className="bg-gray-900 bg-opacity-50 px-4 py-3 rounded mb-4 flex items-center justify-between">
             <span className="text-lg">
