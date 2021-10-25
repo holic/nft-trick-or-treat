@@ -130,6 +130,12 @@ contract TrickOrTreat is AccessControlUpgradeable {
         visitorHashes[visitorHash] = visitor;
     }
 
+    function addVisitors(NFT[] memory _visitors) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        for (uint i = 0; i < _visitors.length; i++) {
+            addVisitor(_visitors[i]);
+        }
+    }
+
     function listVisitors() public view returns (uint256[] memory) {
         return visitors.values();
     }

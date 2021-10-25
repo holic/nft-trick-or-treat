@@ -24,6 +24,7 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "DOORMAN()": FunctionFragment;
     "addVisitor((address,uint256))": FunctionFragment;
+    "addVisitors(tuple[])": FunctionFragment;
     "bagContents((address,uint256))": FunctionFragment;
     "canRingDoorbell((address,uint256),(address,uint256))": FunctionFragment;
     "dailyVisits(uint256)": FunctionFragment;
@@ -53,6 +54,10 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "addVisitor",
     values: [{ contractAddress: string; tokenId: BigNumberish }]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "addVisitors",
+    values: [{ contractAddress: string; tokenId: BigNumberish }[]]
   ): string;
   encodeFunctionData(
     functionFragment: "bagContents",
@@ -146,6 +151,10 @@ interface TrickOrTreatInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "DOORMAN", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "addVisitor", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "addVisitors",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "bagContents",
     data: BytesLike
@@ -308,6 +317,11 @@ export class TrickOrTreat extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    addVisitors(
+      _visitors: { contractAddress: string; tokenId: BigNumberish }[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     bagContents(
       visitor: { contractAddress: string; tokenId: BigNumberish },
       overrides?: CallOverrides
@@ -412,6 +426,11 @@ export class TrickOrTreat extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  addVisitors(
+    _visitors: { contractAddress: string; tokenId: BigNumberish }[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   bagContents(
     visitor: { contractAddress: string; tokenId: BigNumberish },
     overrides?: CallOverrides
@@ -510,6 +529,11 @@ export class TrickOrTreat extends BaseContract {
 
     addVisitor(
       visitor: { contractAddress: string; tokenId: BigNumberish },
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    addVisitors(
+      _visitors: { contractAddress: string; tokenId: BigNumberish }[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -721,6 +745,11 @@ export class TrickOrTreat extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    addVisitors(
+      _visitors: { contractAddress: string; tokenId: BigNumberish }[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     bagContents(
       visitor: { contractAddress: string; tokenId: BigNumberish },
       overrides?: CallOverrides
@@ -826,6 +855,11 @@ export class TrickOrTreat extends BaseContract {
 
     addVisitor(
       visitor: { contractAddress: string; tokenId: BigNumberish },
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    addVisitors(
+      _visitors: { contractAddress: string; tokenId: BigNumberish }[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
