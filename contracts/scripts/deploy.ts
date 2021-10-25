@@ -79,48 +79,6 @@ async function start() {
     })
   );
 
-  console.log("backfilling visitors");
-  console.log("currently at ", (await contract.listVisitors()).length);
-
-  const treatedFilter = contract.filters.Treated();
-  const fromBlock = 20427163;
-  const treatedEvents = await contract.queryFilter(
-    treatedFilter,
-    fromBlock + 160_000
-  );
-  console.log("found events", treatedEvents.length);
-  const visitors = uniqBy(
-    treatedEvents.map((event) => ({
-      contractAddress: event.args.visitorContractAddress,
-      tokenId: event.args.visitorTokenId,
-    })),
-    ({ contractAddress, tokenId }) => `${contractAddress}:${tokenId}`
-  );
-  console.log("found visitors", visitors.length);
-
-  const newVisitors = compact(
-    await Promise.all(
-      visitors.map(async (visitor) =>
-        (await contract.hasVisitedBefore(visitor)) ? null : visitor
-      )
-    )
-  );
-  console.log("adding new visitors", newVisitors.length);
-
-  if (newVisitors.length) {
-    // await Promise.all(
-    //   newVisitors.map(async (visitor) => {
-    //     const addTx = await contract.addVisitor(visitor, { nonce: ++nonce });
-    //     console.log("adding visitor", addTx.hash);
-    //     await addTx.wait();
-    //   })
-    // );
-    const addTx = await contract.addVisitors(visitors);
-    console.log("adding visitors", addTx.hash);
-    await addTx.wait();
-    console.log("now at ", (await contract.listVisitors()).length);
-  }
-
   console.log("Done!");
 }
 
