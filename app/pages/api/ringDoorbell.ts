@@ -72,7 +72,7 @@ export default async function handler(
 
     const tx = await trickOrTreatContract
       .connect(wallet)
-      .ringDoorbell(data.visitor, data.place, { gasLimit: 150_000 });
+      .ringDoorbell(data.visitor, data.place, { gasLimit: 250_000 });
 
     res.status(200).json({ transaction: tx.hash });
   } catch (error) {
